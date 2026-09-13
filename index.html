@@ -13,7 +13,7 @@
             <h4>Form Dismantle Lapangan</h4>
         </div>
         <div class="dismantle-body">
-            <!-- Form mengirim data langsung ke Google Apps Script Anda -->
+            <!-- Form yang sudah terkunci ke Web App Google Script anda secara rasmi -->
             <form id="dismantleForm" action="https://script.google.com/macros/s/AKfycby9RClIPxWasSJs17V7raPEWP8LHZ9RDHQ6kRETwdLaO3IOSmLgvIq-0Vri36lGRKi7TA/exec" method="POST">
                 
                 <!-- Hidden inputs penampung data koordinat dan berkas foto -->
@@ -46,7 +46,7 @@
                     <input type="text" name="cid_lama" class="form-input" placeholder="Masukkan nomor CID lama jika ada">
                 </div>
 
-                <!-- PARAMETER BARU: NAMA LAMA WAJIB DIISI -->
+                <!-- Nama Lama Wajib Diisi -->
                 <div class="form-group">
                     <label class="form-label">Nama Lama <span class="text-danger">*Wajib Diisi</span></label>
                     <input type="text" name="nama_lama" class="form-input" placeholder="Masukkan nama pelanggan lama..." required>
@@ -55,16 +55,16 @@
                 <!-- Unggah Dokumen Lapangan -->
                 <div class="form-group">
                     <label class="form-label">Foto Rumah</label>
-                    <input type="file" id="foto_rumah" class="form-file" accept="https://drive.google.com/drive/folders/1h2RcpTloDDkh5oOzolu84A_I_encWtZh?usp=drive_link*" capture="environment" required onchange="prosesGambar('rumah')">
+                    <input type="file" id="foto_rumah" class="form-file" accept="image/*" capture="environment" required onchange="prosesGambar('rumah')">
                 </div>
 
                 <!-- Foto Perangkat: Sekaligus memicu pembacaan Barcode SN otomatis -->
                 <div class="form-group">
                     <label class="form-label">Foto Perangkat &amp; Scan Barcode</label>
-                    <input type="file" id="foto_perangkat" class="form-file" accept="https://drive.google.com/drive/folders/1cdLmMJj_inCE8d0IllMVlJ_y_jsgs9P-?usp=drive_link*" capture="environment" required onchange="prosesGambar('perangkat')">
+                    <input type="file" id="foto_perangkat" class="form-file" accept="image/*" capture="environment" required onchange="prosesGambar('perangkat')">
                 </div>
 
-                <!-- Kolom Input SN (Otomatis Terisi dari Foto Perangkat / Bisa Diketik Manual) -->
+                <!-- Kolom Input SN (Otomatis Terisi / Bisa Diketik Manual) -->
                 <div class="form-group">
                     <label class="form-label">Serial Number (SN) <span class="text-danger">*Wajib Terisi</span></label>
                     <input type="text" name="sn_number" id="sn_number" class="form-input fw-bold" placeholder="Menunggu foto stiker perangkat..." required>
@@ -87,7 +87,7 @@
 <!-- Layar Loading Pengiriman -->
 <div class="loading-overlay" id="loading">
     <div class="spinner-border"></div>
-    <h5 id="loading-text" style="color: white; margin-top: 15px; font-weight: bold;">Sedang Memproses Laporan Lapangan...</h5>
+    <h5 style="color: white; margin-top: 15px; font-weight: bold;">Sedang Memproses Laporan Lapangan...</h5>
 </div>
 
 <!-- Objek Penampung Analisis Barcode Scanner Tersembunyi -->
@@ -153,22 +153,22 @@ function prosesGambar(tipe) {
     const inputElement = document.getElementById("foto_" + tipe);
     if (!inputElement || inputElement.files.length === 0) return;
     
-    const file = inputElement.files[0];
+    const file = inputElement.files;
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = function () {
-        const rawBase64 = reader.result.split(',')[1];
+        const rawBase64 = reader.result.split(',');
         document.getElementById("foto_" + tipe + "_base64").value = rawBase64;
         document.getElementById("type_" + tipe).value = file.type;
     };
 
-    // FUNGSI SCAN BERBASIS FILE FOTO (REFERENSI FORMAT BARCODE 1D MODEM XPON)
+    // FUNGSI SCAN BERBASIS FILE FOTO STIKER BARCODE 1D MODEM XPON
     if (tipe === "perangkat") {
         document.getElementById("scan-status").innerText = "Sedang memproses deteksi barcode 1D stiker perangkat...";
         document.getElementById("scan-status").className = "form-text-muted";
-        
-        if (!html5QrCodeEngine) {
+
+                if (!html5QrCodeEngine) {
             // Mengonfigurasi pustaka agar fokus mencari format Barcode 1D (Code 128 / Code 39)
             html5QrCodeEngine = new Html5Qrcode("qr-reader-hidden", {
                 formatsToSupport: [ 
@@ -178,7 +178,7 @@ function prosesGambar(tipe) {
             });
         }
 
-        // PERBAIKAN: Menggunakan file[0] agar pembacaan objek berkas foto stiker dari HP valid & lancar
+        // PERBAIKAN: Menggunakan variabel file[0] agar pembacaan objek gambar dari HP valid & lancar
         html5QrCodeEngine.scanFile(file[0], true)
             .then(decodedText => {
                 // JIKA PEMINDAIAN BERHASIL
@@ -187,7 +187,7 @@ function prosesGambar(tipe) {
                 document.getElementById("scan-status").className = "text-success-status";
             })
             .catch(err => {
-                // JIKA STIKER KOTOR / BLUR / GAGAL SCAN: Beri akses ketik manual
+                // JIKA STIKER KOTOR / BLUR / GAGAL SCAN
                 document.getElementById("sn_number").value = "";
                 document.getElementById("scan-status").innerText = "Barcode stiker tidak terbaca jelas. Silakan masukkan nomor SN secara MANUAL pada kolom di atas.";
                 document.getElementById("scan-status").className = "text-danger-status";
@@ -199,3 +199,5 @@ function prosesGambar(tipe) {
 document.getElementById("dismantleForm").addEventListener("submit", function() {
     document.getElementById("loading").style.display = "flex";
 });
+
+        if (!html5QrCodeEngine) {
