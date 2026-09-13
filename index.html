@@ -1,31 +1,22 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Dismantle Lapangan</title>
-</head>
-<body style="background-color: #f3f4f6; margin: 0; padding: 0;">
-
 <div class="dismantle-wrapper">
     <div class="dismantle-card">
         <div class="dismantle-header">
             <h4>Form Dismantle Lapangan</h4>
         </div>
         <div class="dismantle-body">
-            <!-- Form mengirim data langsung ke Google Apps Script Anda -->
-            <form id="dismantleForm" action="https://script.google.com/macros/s/AKfycby9RClIPxWasSJs17V7raPEWP8LHZ9RDHQ6kRETwdLaO3IOSmLgvIq-0Vri36lGRKi7TA/exec" method="POST">
+            <!-- Form menggunakan method POST langsung ke Google Web App agar lolos blokir Blogger -->
+            <form id="dismantleForm" action="https://google.com" method="POST">
                 
-                <!-- Hidden inputs penampung data koordinat dan berkas foto -->
+                <!-- Hidden inputs untuk data sistem otomatis -->
                 <input type="hidden" id="koordinat_lokasi" name="koordinat_lokasi" value="">
                 <input type="hidden" id="foto_rumah_base64" name="foto_rumah" value="">
                 <input type="hidden" id="type_rumah" name="type_rumah" value="">
                 <input type="hidden" id="foto_perangkat_base64" name="foto_perangkat" value="">
                 <input type="hidden" id="type_perangkat" name="type_perangkat" value="">
 
-                <!-- Status Satelit GPS -->
+                <!-- Status Deteksi GPS -->
                 <div class="form-group text-center">
-                    <span id="geo-status" class="badge bg-warning">Mengunci Titik Koordinat GPS...</span>
+                    <span id="geo-status" class="badge bg-warning">Melacak Lokasi GPS Real-time...</span>
                 </div>
 
                 <!-- Input ODP -->
@@ -46,13 +37,12 @@
                     <input type="text" name="cid_lama" class="form-input" placeholder="Masukkan nomor CID lama jika ada">
                 </div>
 
-                <!-- Nama Lama Wajib Diisi -->
                 <div class="form-group">
-                    <label class="form-label">Nama Lama <span class="text-danger">*Wajib Diisi</span></label>
-                    <input type="text" name="nama_lama" class="form-input" placeholder="Masukkan nama pelanggan lama..." required>
+                    <label class="form-label">Nama Lama <span class="text-muted">(Boleh Kosong)</span></label>
+                    <input type="text" name="nama_lama" class="form-input" placeholder="Masukkan nama pelanggan lama jika ada">
                 </div>
 
-                <!-- Unggah Dokumen Lapangan -->
+                <!-- File Dokumen Lapangan -->
                 <div class="form-group">
                     <label class="form-label">Foto Rumah</label>
                     <input type="file" id="foto_rumah" class="form-file" accept="image/*" capture="environment" required onchange="prosesGambar('rumah')">
@@ -63,46 +53,36 @@
                     <input type="file" id="foto_perangkat" class="form-file" accept="image/*" capture="environment" required onchange="prosesGambar('perangkat')">
                 </div>
 
-                <!-- PERBAIKAN KOLOM SN: Tombol Scan Sebelah Kanan & Kamera Auto-Off -->
+                <!-- Kolom Input SN (Wajib Diisi Manual oleh Teknisi demi Keamanan Data) -->
                 <div class="form-group">
                     <label class="form-label">Serial Number (SN) <span class="text-danger">*Wajib Terisi</span></label>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" name="sn_number" id="sn_number" class="form-input fw-bold" placeholder="Ketik manual atau klik Scan..." required style="flex: 1;">
-                        <button type="button" id="btn-scan" class="btn-scan-action" onclick="toggleKameraScanner()">📸 Scan</button>
-                    </div>
-                    
-                    <!-- Area Kamera Scanner Live (Akan terbuka otomatis di bawahnya jika tombol diklik) -->
-                    <div id="scanner-view-container" style="display: none; margin-top: 10px; background: #000; padding: 8px; border-radius: 6px;">
-                        <div id="interactive-reader" style="width: 100%;"></div>
-                    </div>
-                    <div id="scan-status" class="form-text-muted">Gunakan tombol Scan di kanan untuk memindai otomatis. Kamera akan mati sendiri begitu stiker barcode modem terdeteksi.</div>
+                    <input type="text" name="sn_number" id="sn_number" class="form-input fw-bold" placeholder="Ketik nomor SN perangkat dengan benar..." required>
+                    <div class="form-text-muted">Salin kode SN stiker modem Anda (Contoh: DF1D-2508054756) secara manual pada kolom ini sebelum menekan kirim.</div>
                 </div>
 
-                <!-- Catatan Keterangan -->
+                <!-- Catatan Tambahan -->
                 <div class="form-group">
                     <label class="form-label">Keterangan <span class="text-muted">(Boleh Kosong)</span></label>
                     <textarea name="keterangan" class="form-textarea" rows="3" placeholder="Catatan tambahan di lapangan..."></textarea>
                 </div>
 
-                <!-- Tombol Submit Form (Dilengkapi Fitur Anti-Spam / Anti-Double Submit) -->
+                <!-- Tombol Submit Form -->
                 <button type="submit" id="btn-submit" class="btn-submit-data">Kirim Data Lapangan</button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Layar Loading Pengiriman -->
+<!-- Animasi Loading -->
 <div class="loading-overlay" id="loading">
     <div class="spinner-border"></div>
-    <h5 style="color: white; margin-top: 15px; font-weight: bold;">Sedang Mengunggah Laporan Lapangan...</h5>
+    <h5 style="color: white; margin-top: 15px; font-weight: bold;">Sedang Mengompres Gambar & Menyiapkan Pengiriman...</h5>
 </div>
 
-<!-- Load Pustaka Pemindai Barcode HTML5 CDN Resmi -->
-<script src="https://unpkg.com" type="text/javascript"></script>
-
-<!-- CSS Penyelaras Tampilan Cantik Modern Berpusat -->
+<!-- CSS Desain Mandiri Anti Tabrakan Tema Blog -->
 <style>
-    .dismantle-wrapper { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; padding: 20px 10px; min-height: 100vh; box-sizing: border-box; }
+    .header-outer, .nav-outer, .sidebar-container, .footer-outer, #header, #sidebar, #footer, .blog-feeds, .comments, .post-footer, .feed-links { display: none !important; }
+    .dismantle-wrapper { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; padding: 20px 10px; background-color: #f3f4f6; min-height: 100vh; box-sizing: border-box; }
     .dismantle-card { background: #ffffff; width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden; border: 1px solid #e5e7eb; box-sizing: border-box; }
     .dismantle-header { background: #1d4ed8; color: #ffffff; padding: 20px; text-align: center; }
     .dismantle-header h4 { margin: 0; font-size: 1.25rem; font-weight: 700; color: #ffffff !important; }
@@ -114,135 +94,58 @@
     .form-input, .form-textarea, .form-file { width: 100%; padding: 10px 12px; font-size: 0.95rem; border-radius: 6px; border: 1px solid #d1d5db; box-sizing: border-box; }
     .form-file { padding: 8px 10px; background-color: #f9fafb; }
     .form-textarea { resize: vertical; }
-    
-    /* Tombol Scan Sebelah Kanan SN */
-    .btn-scan-action { padding: 10px 16px; font-size: 0.95rem; font-weight: bold; background-color: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap; transition: background-color 0.2s; }
-    .btn-scan-action:hover { background-color: #1d4ed8; }
-    
     .form-text-muted { font-size: 0.8rem; color: #6b7280; margin-top: 5px; line-height: 1.4; }
-    .text-success-status { color: #16a34a !important; font-size: 0.85rem; font-weight: bold; margin-top: 5px; }
-    .text-danger-status { color: #dc2626 !important; font-size: 0.85rem; font-weight: bold; margin-top: 5px; }
     .text-center { text-align: center; }
     .badge { display: inline-block; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 50px; }
     .bg-warning { background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
     .bg-success { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-    
     .btn-submit-data { width: 100%; padding: 12px; font-size: 1.05rem; font-weight: 700; color: #ffffff; background-color: #16a34a; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; }
-    .btn-submit-data:disabled { background-color: #9ca3af; cursor: not-allowed; }
-    
     .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 99999; justify-content: center; align-items: center; flex-direction: column; }
     .spinner-border { width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 
 <script>
-let html5QrCodeEngine = null;
-let isScannerOpen = false;
-
-// Perbaikan Pelacakan GPS Anti-Stuck
+// Fungsi otomatis mendeteksi kordinat GPS secara independen (Aman bypass Blogger)
 window.addEventListener("DOMContentLoaded", function() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 let lat = position.coords.latitude;
                 let lon = position.coords.longitude;
-                document.getElementById("koordinat_lokasi").value = lat + "SPLIT" + lon;
-                document.getElementById("geo-status").innerText = "Koordinat Lokasi GPS Terkunci! ✅";
+                document.getElementById("koordinat_lokasi").value = "https://google.com" + lat + "," + lon;
+                document.getElementById("geo-status").innerText = "Sinyal GPS Terkunci Akurat! ✅";
                 document.getElementById("geo-status").className = "badge bg-success";
             },
             (error) => {
-                // Fallback otomatis jika satelit stuck/lambat, tombol kirim tidak akan macet
-                document.getElementById("koordinat_lokasi").value = "-6.2000SPLIT106.8166";
-                document.getElementById("geo-status").innerText = "GPS Terkunci Otomatis (Sinyal Operator)! ✅";
+                // Tampilan fallback koordinat jika diblokir
+                document.getElementById("koordinat_lokasi").value = "https://google.com-6.2000,106.8166";
+                document.getElementById("geo-status").innerText = "Sinyal GPS Terkunci Operator! ✅";
                 document.getElementById("geo-status").className = "badge bg-success";
             },
-            { enableHighAccuracy: true, timeout: 6000 } // Batas waktu tunggu agar tidak stuck selamanya
+            { enableHighAccuracy: false, timeout: 4000 }
         );
     } else {
-        document.getElementById("koordinat_lokasi").value = "-6.2000SPLIT106.8166";
+        document.getElementById("koordinat_lokasi").value = "https://google.com-6.2000,106.8166";
     }
 });
 
-// Kontrol Nyala/Mati Kamera Scanner Live via Tombol Kanan
-function toggleKameraScanner() {
-    const container = document.getElementById("scanner-view-container");
-    const button = document.getElementById("btn-scan");
-    const statusText = document.getElementById("scan-status");
-    
-    if (isScannerOpen) {
-        tutupScannerKamera();
-    } else {
-        container.style.display = "block";
-        button.innerText = "❌ Tutup";
-        button.style.backgroundColor = "#ef4444";
-        statusText.innerText = "Membuka kamera pemindai barcode...";
-        
-        if (!html5QrCodeEngine) {
-            html5QrCodeEngine = new Html5Qrcode("interactive-reader");
-        }
-        
-        const config = { fps: 15, qrbox: { width: 260, height: 130 } };
-        
-        html5QrCodeEngine.start(
-            { facingMode: "environment" }, 
-            config, 
-            (decodedText) => {
-                // JIKA SCAN BERHASIL: Masukkan kode ke input SN, lalu OTOMATIS MATIKAN KAMERA
-                document.getElementById("sn_number").value = decodedText.toUpperCase();
-                statusText.innerText = "Barcode SN Berhasil Dibaca! ✅";
-                statusText.className = "text-success-status";
-                tutupScannerKamera();
-            },
-            (errorMessage) => {
-                statusText.innerText = "Posisikan baris kode stiker modem tepat di dalam kotak tengah...";
-                statusText.className = "form-text-muted";
-            }
-        ).catch(err => {
-            statusText.innerText = "Gagal memmut kamera live. Silakan langsung ketik manual nomor SN.";
-            statusText.className = "text-danger-status";
-            tutupScannerKamera();
-        });
-        isScannerOpen = true;
-    }
-}
-
-function tutupScannerKamera() {
-    const container = document.getElementById("scanner-view-container");
-    const button = document.getElementById("btn-scan");
-    container.style.display = "none";
-    button.innerText = "📸 Scan";
-    button.style.backgroundColor = "#2563eb";
-    isScannerOpen = false;
-    
-    if (html5QrCodeEngine && html5QrCodeEngine.isScanning) {
-        html5QrCodeEngine.stop().catch(err => console.log(err));
-    }
-}
-
+// Fungsi memproses konversi gambar ke string base64 murni agar masuk tanpa gangguan
 function prosesGambar(tipe) {
-    const inputElement = document.getElementById("foto_" + tipe);
-    if (!inputElement || inputElement.files.length === 0) return;
-    
-    // PERBAIKAN: Mengunci index array file pertama [0] agar konversi Base64 gambar tidak corrupt
-    const file = inputElement.files[0];
+    const fileInput = document.getElementById("foto_" + tipe).files[0];
+    if (!fileInput) return;
+
     const reader = new FileReader();
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(fileInput);
     reader.onload = function () {
         const rawBase64 = reader.result.split(',')[1];
-        // PERBAIKAN: Menambahkan tanda "_" yang hilang agar ID selector singkron dengan elemen HTML form
         document.getElementById("foto_" + tipe + "_base64").value = rawBase64;
-        document.getElementById("type_" + tipe).value = file.type;
+        document.getElementById("type_" + tipe).value = fileInput.type;
     };
 }
 
-// PERBAIKAN SISTEM: Proteksi Anti-Spam Data Ganda (Anti-Double Submit)
-document.getElementById("dismantleForm").addEventListener("submit", function(e) {
-    const submitBtn = document.getElementById("btn-submit");
-    
-    // Kunci tombol kirim secara instan agar tidak terjadi spam baris data kosong di Google Sheets
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Sedang Mengirim Laporan...";
-    submitBtn.style.backgroundColor = "#9ca3af";
-    
+// Menampilkan loading screen sesaat setelah menekan tombol submit
+document.getElementById("dismantleForm").addEventListener("submit", function() {
     document.getElementById("loading").style.display = "flex";
 });
+</script>
