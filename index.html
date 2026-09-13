@@ -4,82 +4,74 @@
             <h4>Form Dismantle Lapangan</h4>
         </div>
         <div class="dismantle-body">
-            <!-- Form menggunakan method POST langsung ke Google Web App agar lolos blokir Blogger -->
-            <form id="dismantleForm" action="https://script.google.com/macros/s/AKfycby9RClIPxWasSJs17V7raPEWP8LHZ9RDHQ6kRETwdLaO3IOSmLgvIq-0Vri36lGRKi7TA/exec" method="POST">
+            <form id="dismantleForm" action="https://google.com" method="POST">
                 
-                <!-- Hidden inputs untuk data sistem otomatis -->
                 <input type="hidden" id="koordinat_lokasi" name="koordinat_lokasi" value="">
                 <input type="hidden" id="foto_rumah_base64" name="foto_rumah" value="">
                 <input type="hidden" id="type_rumah" name="type_rumah" value="">
                 <input type="hidden" id="foto_perangkat_base64" name="foto_perangkat" value="">
                 <input type="hidden" id="type_perangkat" name="type_perangkat" value="">
 
-                <!-- Status Deteksi GPS -->
                 <div class="form-group text-center">
-                    <span id="geo-status" class="badge bg-warning">Melacak Lokasi GPS Real-time...</span>
+                    <span id="geo-status" class="badge bg-warning">Mengunci Titik Koordinat GPS...</span>
                 </div>
 
-                <!-- Input ODP -->
                 <div class="form-group">
                     <label class="form-label">Nama / Kode ODP</label>
                     <input type="text" name="odp_name" class="form-input" placeholder="Ketik Nama ODP..." required>
                 </div>
 
-                <!-- Input POP -->
                 <div class="form-group">
                     <label class="form-label">Nama / Kode POP</label>
                     <input type="text" name="pop_name" class="form-input" placeholder="Ketik Nama POP..." required>
                 </div>
 
-                <!-- Input CID & Nama Pelanggan Lama -->
                 <div class="form-group">
                     <label class="form-label">CID Lama <span class="text-muted">(Boleh Kosong)</span></label>
                     <input type="text" name="cid_lama" class="form-input" placeholder="Masukkan nomor CID lama jika ada">
                 </div>
 
+                <!-- SEKARANG NAMA LAMA WAJIB DIISI -->
                 <div class="form-group">
-                    <label class="form-label">Nama Lama <span class="text-muted">(Boleh Kosong)</span></label>
-                    <input type="text" name="nama_lama" class="form-input" placeholder="Masukkan nama pelanggan lama jika ada">
+                    <label class="form-label">Nama Lama <span class="text-danger">*Wajib Diisi</span></label>
+                    <input type="text" name="nama_lama" class="form-input" placeholder="Masukkan nama pelanggan lama..." required>
                 </div>
 
-                <!-- File Dokumen Lapangan -->
                 <div class="form-group">
                     <label class="form-label">Foto Rumah</label>
                     <input type="file" id="foto_rumah" class="form-file" accept="image/*" capture="environment" required onchange="prosesGambar('rumah')">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Foto Perangkat</label>
+                    <label class="form-label">Foto Perangkat & Scan Barcode</label>
                     <input type="file" id="foto_perangkat" class="form-file" accept="image/*" capture="environment" required onchange="prosesGambar('perangkat')">
                 </div>
 
-                <!-- Kolom Input SN (Wajib Diisi Manual oleh Teknisi demi Keamanan Data) -->
                 <div class="form-group">
                     <label class="form-label">Serial Number (SN) <span class="text-danger">*Wajib Terisi</span></label>
-                    <input type="text" name="sn_number" id="sn_number" class="form-input fw-bold" placeholder="Ketik nomor SN perangkat dengan benar..." required>
-                    <div class="form-text-muted">Salin kode SN stiker modem Anda (Contoh: DF1D-2508054756) secara manual pada kolom ini sebelum menekan kirim.</div>
+                    <input type="text" name="sn_number" id="sn_number" class="form-input fw-bold" placeholder="Menunggu foto stiker perangkat..." required>
+                    <div id="scan-status" class="form-text-muted">Sistem akan otomatis memindai barcode begitu Anda mengambil "Foto Perangkat". Jika stiker kotor/buram, Anda bisa langsung mengetik kodenya secara manual di kolom ini.</div>
                 </div>
 
-                <!-- Catatan Tambahan -->
                 <div class="form-group">
                     <label class="form-label">Keterangan <span class="text-muted">(Boleh Kosong)</span></label>
                     <textarea name="keterangan" class="form-textarea" rows="3" placeholder="Catatan tambahan di lapangan..."></textarea>
                 </div>
 
-                <!-- Tombol Submit Form -->
                 <button type="submit" id="btn-submit" class="btn-submit-data">Kirim Data Lapangan</button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Animasi Loading -->
 <div class="loading-overlay" id="loading">
     <div class="spinner-border"></div>
-    <h5 style="color: white; margin-top: 15px; font-weight: bold;">Sedang Mengompres Gambar & Menyiapkan Pengiriman...</h5>
+    <h5 style="color: white; margin-top: 15px; font-weight: bold;">Sedang Memproses & Mengirim Laporan...</h5>
 </div>
 
-<!-- CSS Desain Mandiri Anti Tabrakan Tema Blog -->
+<div id="qr-reader-hidden" style="display: none;"></div>
+<script src="https://jsdelivr.net"></script>
+
 <style>
     .header-outer, .nav-outer, .sidebar-container, .footer-outer, #header, #sidebar, #footer, .blog-feeds, .comments, .post-footer, .feed-links { display: none !important; }
     .dismantle-wrapper { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; padding: 20px 10px; background-color: #f3f4f6; min-height: 100vh; box-sizing: border-box; }
@@ -95,6 +87,8 @@
     .form-file { padding: 8px 10px; background-color: #f9fafb; }
     .form-textarea { resize: vertical; }
     .form-text-muted { font-size: 0.8rem; color: #6b7280; margin-top: 5px; line-height: 1.4; }
+    .text-success-status { color: #16a34a !important; font-size: 0.85rem; font-weight: bold; margin-top: 5px; }
+    .text-danger-status { color: #dc2626 !important; font-size: 0.85rem; font-weight: bold; margin-top: 5px; }
     .text-center { text-align: center; }
     .badge { display: inline-block; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 50px; }
     .bg-warning { background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
@@ -106,46 +100,66 @@
 </style>
 
 <script>
-// Fungsi otomatis mendeteksi kordinat GPS secara independen (Aman bypass Blogger)
+let html5QrCodeEngine = null;
+
 window.addEventListener("DOMContentLoaded", function() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 let lat = position.coords.latitude;
                 let lon = position.coords.longitude;
-                document.getElementById("koordinat_lokasi").value = "https://google.com" + lat + "," + lon;
-                document.getElementById("geo-status").innerText = "Sinyal GPS Terkunci Akurat! ✅";
+                document.getElementById("koordinat_lokasi").value = lat + "SPLIT" + lon;
+                document.getElementById("geo-status").innerText = "Koordinat Lokasi GPS Terkunci! ✅";
                 document.getElementById("geo-status").className = "badge bg-success";
             },
             (error) => {
-                // Tampilan fallback koordinat jika diblokir
-                document.getElementById("koordinat_lokasi").value = "https://google.com-6.2000,106.8166";
-                document.getElementById("geo-status").innerText = "Sinyal GPS Terkunci Operator! ✅";
+                document.getElementById("koordinat_lokasi").value = "-6.2000SPLIT106.8166";
+                document.getElementById("geo-status").innerText = "Koordinat GPS Menggunakan Area Sentral Lapangan! ✅";
                 document.getElementById("geo-status").className = "badge bg-success";
             },
-            { enableHighAccuracy: false, timeout: 4000 }
+            { enableHighAccuracy: true, timeout: 5000 }
         );
     } else {
-        document.getElementById("koordinat_lokasi").value = "https://google.com-6.2000,106.8166";
+        document.getElementById("koordinat_lokasi").value = "-6.2000SPLIT106.8166";
     }
 });
 
-// Fungsi memproses konversi gambar ke string base64 murni agar masuk tanpa gangguan
 function prosesGambar(tipe) {
-    const fileInput = document.getElementById("foto_" + tipe).files[0];
-    if (!fileInput) return;
+    const inputElement = document.getElementById("foto_" + tipe);
+    if (!inputElement || inputElement.files.length === 0) return;
+    
+    const file = inputElement.files[0];
 
     const reader = new FileReader();
-    reader.readAsDataURL(fileInput);
+    reader.readAsDataURL(file);
     reader.onload = function () {
         const rawBase64 = reader.result.split(',')[1];
         document.getElementById("foto_" + tipe + "_base64").value = rawBase64;
-        document.getElementById("type_" + tipe).value = fileInput.type;
+        document.getElementById("type_" + tipe).value = file.type;
     };
+
+    if (tipe === "perangkat") {
+        document.getElementById("scan-status").innerText = "Sedang menganalisis stiker barcode perangkat...";
+        document.getElementById("scan-status").className = "form-text-muted";
+        
+        if (!html5QrCodeEngine) {
+            html5QrCodeEngine = new Html5Qrcode("qr-reader-hidden");
+        }
+
+        html5QrCodeEngine.scanFile(file, true)
+            .then(decodedText => {
+                document.getElementById("sn_number").value = decodedText.toUpperCase();
+                document.getElementById("scan-status").innerText = "Barcode SN Berhasil Dibaca Otomatis! ✅";
+                document.getElementById("scan-status").className = "text-success-status";
+            })
+            .catch(err => {
+                document.getElementById("sn_number").value = "";
+                document.getElementById("scan-status").innerText = "Barcode tidak terbaca jelas. Silakan KETIK MANUAL nomor SN perangkat Anda pada kolom di atas.";
+                document.getElementById("scan-status").className = "text-danger-status";
+            });
+    }
 }
 
-// Menampilkan loading screen sesaat setelah menekan tombol submit
 document.getElementById("dismantleForm").addEventListener("submit", function() {
     document.getElementById("loading").style.display = "flex";
 });
-</script>
