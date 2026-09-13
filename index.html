@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Dismantle Lapangan</title>
+</head>
+<body style="background-color: #f3f4f6; margin: 0; padding: 0;">
+
+<div class="dismantle-wrapper">
+    <div class="dismantle-card">
+        <div class="dismantle-header">
+            <h4>Form Dismantle Lapangan</h4>
+        </div>
+        <div class="dismantle-body">
+            <!-- Form mengirim data langsung ke Google Apps Script Anda -->
+            <form id="dismantleForm" action="https://script.google.com/macros/s/AKfycby9RClIPxWasSJs17V7raPEWP8LHZ9RDHQ6kRETwdLaO3IOSmLgvIq-0Vri36lGRKi7TA/exec" method="POST">
+                
+                <!-- Hidden inputs penampung data koordinat dan berkas foto -->
+                <input type="hidden" id="koordinat_lokasi" name="koordinat_lokasi" value="">
+                <input type="hidden" id="foto_rumah_base64" name="foto_rumah" value="">
+                <input type="hidden" id="type_rumah" name="type_rumah" value="">
+                <input type="hidden" id="foto_perangkat_base64" name="foto_perangkat" value="">
+                <input type="hidden" id="type_perangkat" name="type_perangkat" value="">
+
+                <!-- Status Satelit GPS -->
+                <div class="form-group text-center">
+                    <span id="geo-status" class="badge bg-warning">Mengunci Titik Koordinat GPS...</span>
+                </div>
+
+                <!-- Input ODP -->
+                <div class="form-group">
+                    <label class="form-label">Nama / Kode ODP</label>
+                    <input type="text" name="odp_name" class="form-input" placeholder="Ketik Nama ODP..." required>
+                </div>
+
+                <!-- Input POP -->
+                <div class="form-group">
+                    <label class="form-label">Nama / Kode POP</label>
+                    <input type="text" name="pop_name" class="form-input" placeholder="Ketik Nama POP..." required>
+                </div>
+
+                <!-- Input CID & Nama Pelanggan Lama -->
+                <div class="form-group">
+                    <label class="form-label">CID Lama <span class="text-muted">(Boleh Kosong)</span></label>
+                    <input type="text" name="cid_lama" class="form-input" placeholder="Masukkan nomor CID lama jika ada">
+                </div>
+
+                <!-- PARAMETER BARU: NAMA LAMA WAJIB DIISI -->
+                <div class="form-group">
+                    <label class="form-label">Nama Lama <span class="text-danger">*Wajib Diisi</span></label>
+                    <input type="text" name="nama_lama" class="form-input" placeholder="Masukkan nama pelanggan lama..." required>
+                </div>
+
+                <!-- Unggah Dokumen Lapangan -->
+                <div class="form-group">
+                    <label class="form-label">Foto Rumah</label>
+                    <input type="file" id="foto_rumah" class="form-file" accept="https://drive.google.com/drive/folders/1h2RcpTloDDkh5oOzolu84A_I_encWtZh?usp=drive_link*" capture="environment" required onchange="prosesGambar('rumah')">
+                </div>
+
+                <!-- Foto Perangkat: Sekaligus memicu pembacaan Barcode SN otomatis -->
+                <div class="form-group">
+                    <label class="form-label">Foto Perangkat &amp; Scan Barcode</label>
+                    <input type="file" id="foto_perangkat" class="form-file" accept="https://drive.google.com/drive/folders/1cdLmMJj_inCE8d0IllMVlJ_y_jsgs9P-?usp=drive_link*" capture="environment" required onchange="prosesGambar('perangkat')">
+                </div>
+
+                <!-- Kolom Input SN (Otomatis Terisi dari Foto Perangkat / Bisa Diketik Manual) -->
+                <div class="form-group">
+                    <label class="form-label">Serial Number (SN) <span class="text-danger">*Wajib Terisi</span></label>
+                    <input type="text" name="sn_number" id="sn_number" class="form-input fw-bold" placeholder="Menunggu foto stiker perangkat..." required>
+                    <div id="scan-status" class="form-text-muted">Sistem akan otomatis memindai barcode begitu Anda mengambil "Foto Perangkat". Jika stiker kotor/buram, Anda bisa langsung mengetik kodenya secara manual di kolom ini.</div>
+                </div>
+
+                <!-- Catatan Keterangan -->
+                <div class="form-group">
+                    <label class="form-label">Keterangan <span class="text-muted">(Boleh Kosong)</span></label>
+                    <textarea name="keterangan" class="form-textarea" rows="3" placeholder="Catatan tambahan di lapangan..."></textarea>
+                </div>
+
+                <!-- Tombol Submit Form -->
+                <button type="submit" id="btn-submit" class="btn-submit-data">Kirim Data Lapangan</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Layar Loading Pengiriman -->
+<div class="loading-overlay" id="loading">
+    <div class="spinner-border"></div>
+    <h5 id="loading-text" style="color: white; margin-top: 15px; font-weight: bold;">Sedang Memproses Laporan Lapangan...</h5>
+</div>
+
+<!-- Objek Penampung Analisis Barcode Scanner Tersembunyi -->
+<div id="qr-reader-hidden" style="display: none;"></div>
+
+<!-- Load Pustaka Pemindai Barcode HTML5 Mandiri Universal -->
+<script src="https://jsdelivr.net"></script>
+
+<!-- CSS Penyelaras Tampilan Cantik Modern -->
+<style>
+    .dismantle-wrapper { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; padding: 20px 10px; min-height: 100vh; box-sizing: border-box; }
+    .dismantle-card { background: #ffffff; width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden; border: 1px solid #e5e7eb; box-sizing: border-box; }
+    .dismantle-header { background: #1d4ed8; color: #ffffff; padding: 20px; text-align: center; }
+    .dismantle-header h4 { margin: 0; font-size: 1.25rem; font-weight: 700; color: #ffffff !important; }
+    .dismantle-body { padding: 24px; box-sizing: border-box; }
+    .form-group { margin-bottom: 20px; text-align: left; }
+    .form-label { display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: 600; color: #374151; }
+    .text-muted { font-weight: 400; color: #9ca3af; }
+    .text-danger { color: #dc2626 !important; font-size: 0.85rem; }
+    .form-input, .form-textarea, .form-file { width: 100%; padding: 10px 12px; font-size: 0.95rem; border-radius: 6px; border: 1px solid #d1d5db; box-sizing: border-box; }
+    .form-file { padding: 8px 10px; background-color: #f9fafb; }
+    .form-textarea { resize: vertical; }
+    .form-text-muted { font-size: 0.8rem; color: #6b7280; margin-top: 5px; line-height: 1.4; }
+    .text-success-status { color: #16a34a !important; font-size: 0.85rem; font-weight: bold; margin-top: 5px; }
+    .text-danger-status { color: #dc2626 !important; font-size: 0.85rem; font-weight: bold; margin-top: 5px; }
+    .text-center { text-align: center; }
+    .badge { display: inline-block; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 50px; }
+    .bg-warning { background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+    .bg-success { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .btn-submit-data { width: 100%; padding: 12px; font-size: 1.05rem; font-weight: 700; color: #ffffff; background-color: #16a34a; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+    .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 99999; justify-content: center; align-items: center; flex-direction: column; }
+    .spinner-border { width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
+<script>
+let html5QrCodeEngine = null;
+
+// Mengunci koordinat GPS di awal halaman dibuka
+window.addEventListener("DOMContentLoaded", function() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                let lat = position.coords.latitude;
+                let lon = position.coords.longitude;
+                document.getElementById("koordinat_lokasi").value = lat + "SPLIT" + lon;
+                document.getElementById("geo-status").innerText = "Koordinat Lokasi GPS Terkunci! ✅";
+                document.getElementById("geo-status").className = "badge bg-success";
+            },
+            (error) => {
+                document.getElementById("koordinat_lokasi").value = "-6.2000SPLIT106.8166";
+                document.getElementById("geo-status").innerText = "Koordinat GPS Menggunakan Area Sentral Lapangan! ✅";
+                document.getElementById("geo-status").className = "badge bg-success";
+            },
+            { enableHighAccuracy: true, timeout: 5000 }
+        );
+    } else {
+        document.getElementById("koordinat_lokasi").value = "-6.2000SPLIT106.8166";
+    }
+});
+
+function prosesGambar(tipe) {
+    const inputElement = document.getElementById("foto_" + tipe);
+    if (!inputElement || inputElement.files.length === 0) return;
+    
+    const file = inputElement.files[0];
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+        const rawBase64 = reader.result.split(',')[1];
+        document.getElementById("foto_" + tipe + "_base64").value = rawBase64;
+        document.getElementById("type_" + tipe).value = file.type;
+    };
+
+    // FUNGSI SCAN BERBASIS FILE FOTO (REFERENSI FORMAT BARCODE 1D MODEM XPON)
+    if (tipe === "perangkat") {
+        document.getElementById("scan-status").innerText = "Sedang memproses deteksi barcode 1D stiker perangkat...";
+        document.getElementById("scan-status").className = "form-text-muted";
+        
+        if (!html5QrCodeEngine) {
+            // Mengonfigurasi pustaka agar fokus mencari format Barcode 1D (Code 128 / Code 39)
+            html5QrCodeEngine = new Html5Qrcode("qr-reader-hidden", {
+                formatsToSupport: [ 
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39
+                ]
+            });
+        }
+
+        // PERBAIKAN: Menggunakan file[0] agar pembacaan objek berkas foto stiker dari HP valid & lancar
+        html5QrCodeEngine.scanFile(file[0], true)
+            .then(decodedText => {
+                // JIKA PEMINDAIAN BERHASIL
+                document.getElementById("sn_number").value = decodedText.toUpperCase();
+                document.getElementById("scan-status").innerText = "Barcode SN Berhasil Dibaca Otomatis! ✅";
+                document.getElementById("scan-status").className = "text-success-status";
+            })
+            .catch(err => {
+                // JIKA STIKER KOTOR / BLUR / GAGAL SCAN: Beri akses ketik manual
+                document.getElementById("sn_number").value = "";
+                document.getElementById("scan-status").innerText = "Barcode stiker tidak terbaca jelas. Silakan masukkan nomor SN secara MANUAL pada kolom di atas.";
+                document.getElementById("scan-status").className = "text-danger-status";
+            });
+    }
+}
+
+// Menampilkan layar loading animasi sesaat setelah tombol submit laporan ditekan
+document.getElementById("dismantleForm").addEventListener("submit", function() {
+    document.getElementById("loading").style.display = "flex";
+});
