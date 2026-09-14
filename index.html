@@ -58,17 +58,32 @@
 
 <div class="app-wrapper flex flex-col min-h-screen">
 
-    <!-- HEADER / BAR ATAS -->
-    <header class="bg-white border-b px-4 py-3 flex justify-between items-center sticky top-0 z-40 shadow-sm w-full">
-        <h1 class="text-sm font-bold text-gray-800">Sistem Lapangan</h1>
-        <div id="authArea">
-            <button onclick="openLoginAdminModal()" id="btnLoginAdmin"
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-all">
-                Login Admin
+    <!-- HEADER / BAR ATAS (DENGAN NAVIGASI ADMIN DAN LAPANGAN) -->
+    <header class="bg-white border-b px-4 py-2.5 flex justify-between items-center sticky top-0 z-40 shadow-sm w-full">
+        <div class="flex items-center gap-2">
+            <h1 class="text-xs sm:text-sm font-extrabold text-slate-800 tracking-tight">Sistem Lapangan</h1>
+        </div>
+
+        <!-- NAVIGASI ATAS -->
+        <div class="flex items-center gap-1.5">
+            <!-- TOMBOL KE SISTEM LAPANGAN -->
+            <button onclick="switchToPegawaiView()" id="navBtnLapangan"
+                class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1 transition-all">
+                <i class="fas fa-edit"></i> <span class="hidden sm:inline">Sistem</span> Lapangan
             </button>
-            <div id="adminBadge" class="hidden flex items-center gap-2">
-                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Admin</span>
-                <button onclick="logoutAdmin()" class="text-xs text-red-500 font-bold hover:underline">Keluar</button>
+
+            <!-- TOMBOL DASHBOARD ADMIN -->
+            <button onclick="switchToAdminView()" id="navBtnAdmin"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1">
+                <i class="fas fa-chart-line"></i> Dashboard <span class="hidden sm:inline">Admin</span>
+            </button>
+
+            <!-- STATUS ADMIN & LOGOUT -->
+            <div id="adminBadge" class="hidden flex items-center gap-1.5 border-l pl-2 ml-1">
+                <span class="bg-indigo-100 text-indigo-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">Admin</span>
+                <button onclick="logoutAdmin()" class="text-xs text-red-500 font-bold hover:underline" title="Keluar Admin">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
         </div>
     </header>
@@ -181,10 +196,7 @@
     <!-- DASHBOARD ADMIN DENGAN FILTER SHEET & SEARCH SPESIFIK -->
     <main id="viewAdmin" class="hidden flex-1 p-3 sm:p-6 max-w-6xl mx-auto w-full space-y-4">
         <div class="flex justify-between items-center">
-            <h2 class="text-base font-extrabold text-gray-800">Panel Admin</h2>
-            <button onclick="switchToPegawaiView()" class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-xl text-xs font-bold">
-                <i class="fas fa-arrow-left mr-1"></i> Form Lapangan
-            </button>
+            <h2 class="text-base font-extrabold text-gray-800">Panel Dashboard Admin</h2>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -311,7 +323,7 @@
 </div>
 
 <script>
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwESnxnJqIkgKIkEOc2UMr4uG9esO7l2wiGQ8q6uGNMLGYE6HAATTyRaXenGs5ok0HJSw/exec";
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9RClIPxWasSJs17V7raPEWP8LHZ9RDHQ6kRETwdLaO3IOSmLgvIq-0Vri36lGRKi7TA/exec";
 
     let map, userMarker;
     let currentCoords = { lat: 0, lng: 0 };
@@ -320,7 +332,6 @@
     let globalAdminData = []; 
     let filteredAdminData = [];
 
-    // KAMUS TERJEMAHAN NAMA SHEET
     function translateSheetName(rawName) {
         if (!rawName) return "-";
         if (rawName.toLowerCase() === "baris 1") return "info perangkat";
@@ -491,11 +502,9 @@
     function checkAdminSession() {
         if(sessionStorage.getItem('admin_session') === 'true') {
             isAdminLoggedIn = true;
-            document.getElementById('btnLoginAdmin').classList.add('hidden');
             document.getElementById('adminBadge').classList.remove('hidden');
         } else {
             isAdminLoggedIn = false;
-            document.getElementById('btnLoginAdmin').classList.remove('hidden');
             document.getElementById('adminBadge').classList.add('hidden');
         }
     }
@@ -507,16 +516,28 @@
         showToast("Logout Admin");
     }
 
+    // FUNGSI PERPINDAHAN TAMPILAN VIA HEADER
     function switchToAdminView() {
         if(!isAdminLoggedIn) return openLoginAdminModal();
+        
         document.getElementById('viewPegawai').classList.add('hidden');
         document.getElementById('viewAdmin').classList.remove('hidden');
+        
+        // Style status aktif tombol
+        document.getElementById('navBtnAdmin').className = "bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1 transition-all";
+        document.getElementById('navBtnLapangan').className = "bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1";
+        
         loadAdminData();
     }
 
     function switchToPegawaiView() {
         document.getElementById('viewAdmin').classList.add('hidden');
         document.getElementById('viewPegawai').classList.remove('hidden');
+        
+        // Style status aktif tombol
+        document.getElementById('navBtnLapangan').className = "bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1 transition-all";
+        document.getElementById('navBtnAdmin').className = "bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1";
+        
         setTimeout(() => map.invalidateSize(), 300);
     }
 
@@ -533,19 +554,16 @@
         });
     }
 
-    // FUNGSI PENCARIAN & FILTER MULTI-CRITERIA (SHEET + FIELD + KEYWORD)
     function filterAdminData() {
         const selectedSheet = document.getElementById('filterSheet').value;
         const selectedField = document.getElementById('filterField').value;
         const query = document.getElementById('adminSearchInput').value.toLowerCase().trim();
 
         filteredAdminData = globalAdminData.filter(item => {
-            // 1. Filter Asal Sheet
             if (selectedSheet !== "ALL" && item.sheetAsal !== selectedSheet) {
                 return false;
             }
 
-            // 2. Filter Berdasarkan Kata Kunci
             if (!query) return true;
 
             if (selectedField === "odp") {
@@ -557,7 +575,6 @@
             } else if (selectedField === "pop") {
                 return (item.pop || "").toLowerCase().includes(query);
             } else {
-                // ALL fields
                 return (item.cidLama || "").toLowerCase().includes(query) || 
                        (item.namaLama || "").toLowerCase().includes(query) || 
                        (item.odp || "").toLowerCase().includes(query) || 
@@ -620,7 +637,6 @@
         document.getElementById('selectedCount').innerText = selected.length;
     }
 
-    // FORMAT PESAN WA TERMASUK INFORMASI SUMBER SHEET
     function buildWAMessage(item) {
         let text = `*📌 LAPORAN DATA LAPANGAN*\n`;
         text += `*Sumber Data:* Sheet (${translateSheetName(item.sheetAsal)})\n`;
