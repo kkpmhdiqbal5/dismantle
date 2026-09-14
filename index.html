@@ -8,15 +8,24 @@
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
-    /* RESET STYLE SUPAYA PAS DENGAN LAYAR BLOGGER */
+    /* MELEPASKAN BATASAN TEMPLATE BLOGGER (FULL SCREEN FIX) */
+    .post-body, .entry-content, .post, .article {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
     .app-wrapper {
         font-family: 'Plus Jakarta Sans', sans-serif;
         background-color: #F1F5F9;
         min-height: 100vh;
-        width: 100%;
-        margin: 0 auto;
+        width: 100vw;
+        max-width: 100%;
+        margin: 0;
         padding: 0;
         box-sizing: border-box;
+        overflow-x: hidden;
     }
 
     #field-map {
@@ -43,7 +52,6 @@
         white-space: nowrap;
     }
 
-    /* Penyesuaian responsif input HP */
     input, select, textarea, button {
         font-size: 12px !important;
     }
@@ -204,7 +212,7 @@
                     </thead>
                     <tbody id="tableBodyAdmin">
                         <tr>
-                            <td colspan="7" class="py-6 text-center text-gray-400">Memuat data...</td>
+                            <td colspan="7" class="py-4 text-center text-gray-400">Memuat data...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -248,7 +256,6 @@
 </div>
 
 <script>
-    // ⚠️ PASTE URL WEB APP GOOGLE APPS SCRIPT KAMU DI SINI:
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9RClIPxWasSJs17V7raPEWP8LHZ9RDHQ6kRETwdLaO3IOSmLgvIq-0Vri36lGRKi7TA/exec";
 
     let map, userMarker;
