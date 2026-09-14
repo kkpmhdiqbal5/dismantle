@@ -247,10 +247,16 @@
 
                     <div class="flex items-center gap-2">
                         <!-- TOMBOL MULTI-SEND WA -->
-                        <button onclick="sendSelectedToWA()" 
-                            class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all">
-                            <i class="fab fa-whatsapp text-sm"></i> Kirim Sekaligus (<span id="selectedCount">0</span>)
-                        </button>
+                     
+
+                        <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+  <button onclick="kirimTerpisahSekaligus()" style="background-color: #25D366; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+    📲 Kirim Terpisah (1 Data = 1 WA)
+  </button>
+  <button onclick="kirimPesanGabungan()" style="background-color: #075E54; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">
+    📋 Kirim Gabungan (All-in-1 WA)
+  </button>
+</div>
                         
                         <button onclick="loadAdminData()" class="text-indigo-600 text-xs font-bold bg-white px-3 py-1.5 rounded-xl border border-gray-200 hover:bg-gray-100">
                             <i class="fas fa-sync-alt"></i> Refresh
@@ -592,15 +598,19 @@
     }
 
     function renderAdminTable(data) {
-        const tbody = document.getElementById('tableBodyAdmin');
-        document.getElementById('searchResultCount').innerText = `Total Hasil: ${data.length} Data`;
-        document.getElementById('selectAllCheckbox').checked = false;
-        updateSelectedCount();
+    window.currentAdminData = data; // <-- TAMBAHKAN BARIS INI
+    
+    const tbody = document.getElementById('tableBodyAdmin');
+    document.getElementById('searchResultCount').innerText = `Total Hasil: ${data.length} Data`;
+    document.getElementById('selectAllCheckbox').checked = false;
+    updateSelectedCount();
 
-        if(!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="py-4 text-center text-gray-400">Data tidak ditemukan.</td></tr>';
-            return;
-        }
+    if(!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="py-4 text-center text-gray-400">Data tidak ditemukan.</td></tr>';
+        return;
+    }
+    // ... sisa kode renderAdminTable kamu ke bawah ...
+}
 
         tbody.innerHTML = data.map((item, index) => `
             <tr class="border-b hover:bg-gray-50">
@@ -670,11 +680,65 @@
         window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
     }
 
-    function sendSelectedToWA() {
-        const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
-        if(selectedBoxes.length === 0) {
-            return showToast("Pilih minimal 1 data untuk dikirim!");
-        }
+
+
+    
+   
+// 1. Fungsi ambil data centang
+function getCheckedRows() {
+  const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+  const selectedData = [];
+  checkboxes.forEach(cb => {
+    const index = cb.getAttribute('data-index');
+    // Pastikan nama variabel data (misal: window.dataRekap) sesuai dengan milikmu
+    if (window.dataRekap && window.dataRekap[index]) { 
+      selectedData.push(window.dataRekap[index]);
+    }
+  });
+  return selectedData;
+}
+
+// 2. Fungsi kirim terpisah (dengan jeda 2 detik)
+async function kirimTerpisahSekaligus() {
+  const selectedData = getCheckedRows();
+  if (selectedData.length === 0) { alert("Pilih minimal satu data!"); return; }
+  const noHpTujuan = prompt("Masukkan WA Tujuan (Contoh: 628123...):");
+  if (!noHpTujuan) return;
+
+  if (!confirm(`Kirim ${selectedData.length} pesan terpisah?`)) return;
+
+  for (let i = 0; i < selectedData.length; i++) {
+    const item = selectedData[i];
+    let pesan = `*DETAIL DATA* (${i + 1}/${selectedData.length})\nNama: ${item.namaLama || '-'}\nCID: ${item.cidLama || '-'}\nODP: ${item.odp || '-'}\nPOP: ${item.pop || '-'}\nSN Unit: ${item.snUnit || '-'}`;
+    const waUrl = `https://api.whatsapp.com/send?phone=${noHpTujuan}&text=${encodeURIComponent(pesan)}`;
+
+    window.open(waUrl, '_blank');
+
+    // Jeda waktu
+    if (i < selectedData.length - 1) {
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+}
+
+// 3. Fungsi kirim gabungan
+function kirimPesanGabungan() {
+  const selectedData = getCheckedRows();
+  if (selectedData.length === 0) { alert("Pilih minimal satu data!"); return; }
+  const noHpTujuan = prompt("Masukkan WA Tujuan (Contoh: 628123...):");
+  if (!noHpTujuan) return;
+
+  let pesanGabungan = `*REKAP DATA TERPILIH (${selectedData.length} ITEM)*\n==========================\n\n`;
+  selectedData.forEach((item, index) => {
+    pesanGabungan += `*${index + 1}. ${item.namaLama || 'No Name'}*\n• CID: ${item.cidLama || '-'}\n• ODP: ${item.odp || '-'}\n• SN: ${item.snUnit || '-'}\n--------------------------\n`;
+  });
+
+  const waUrl = `https://api.whatsapp.com/send?phone=${noHpTujuan}&text=${encodeURIComponent(pesanGabungan)}`;
+  window.open(waUrl, '_blank');
+}
+
+
+    
 
         let delay = 0;
         selectedBoxes.forEach(box => {
