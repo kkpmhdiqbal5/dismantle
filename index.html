@@ -256,7 +256,10 @@
                             class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all">
                             <i class="fab fa-whatsapp text-sm"></i> Kirim Sekaligus (<span id="selectedCount">0</span>)
                         </button>
-
+// Contoh rendering tombol di dalam innerHTML tabel
+`<button onclick="kirimWA('${item.cidLama}', '${item.namaLama}', '${item.koordinat}')" class="btn btn-success">
+  <i class="fab fa-whatsapp"></i> WA
+</button>`
                        
                         
                         <button onclick="loadAdminData()" class="text-indigo-600 text-xs font-bold bg-white px-3 py-1.5 rounded-xl border border-gray-200 hover:bg-gray-100">
@@ -760,7 +763,19 @@ function showToast(msg) {
     setTimeout(() => t.style.bottom = '-100px', 3000);
 }
 
+function kirimWA(cid, nama, sherlok) {
+  // Bersihkan parameter link sherlok
+  let linkPeta = "";
+  if (sherlok && sherlok !== "-" && sherlok !== "undefined") {
+    linkPeta = `\nSherlok: ${sherlok.trim()}`;
+  }
 
+  const pesan = `Halo Kak, mengonfirmasi data dismantle/perbaikan:\nCID: ${cid}\nNama: ${nama}${linkPeta}`;
+  
+  // Encode isi pesan agar karakter khusus/URL aman saat dibuka di WA
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(pesan)}`;
+  window.open(waUrl, '_blank');
+}
 
 
 </script>
