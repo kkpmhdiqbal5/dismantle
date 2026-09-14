@@ -455,10 +455,13 @@
       document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked);
     }
 
-    function kirimWA(cid, nama) {
-      const text = `Halo Kak, mengonfirmasi data dismantle/perbaikan:\nCID: ${cid}\nNama: ${nama}`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-    }
+   function kirimWA(cid, nama, sherlok) {
+  // Cek apakah ada link sherlok
+  const linkPeta = (sherlok && sherlok !== "-") ? `\nSherlok: ${sherlok}` : "";
+  
+  const text = `Halo Kak, mengonfirmasi data dismantle/perbaikan:\nCID: ${cid}\nNama: ${nama}${linkPeta}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
   </script>
 </body>
 </html>
