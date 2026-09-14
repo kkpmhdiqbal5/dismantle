@@ -251,6 +251,11 @@
                             class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all">
                             <i class="fab fa-whatsapp text-sm"></i> Kirim Sekaligus (<span id="selectedCount">0</span>)
                         </button>
+
+                        <button onclick="sendGroupToWA()" 
+    class="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-sm">
+    <i class="fas fa-layer-group"></i> Kirim Gabungan (1 WA)
+</button>
                         
                         <button onclick="loadAdminData()" class="text-indigo-600 text-xs font-bold bg-white px-3 py-1.5 rounded-xl border border-gray-200 hover:bg-gray-100">
                             <i class="fas fa-sync-alt"></i> Refresh
@@ -587,206 +592,152 @@
                        (item.snUnit || "").toLowerCase().includes(query);
             }
         });
-
-        renderAdminTable(filteredAdminData);
-    }
-
-    function renderAdminTable(data) {
-        const tbody = document.getElementById('tableBodyAdmin');
-        document.getElementById('searchResultCount').innerText = `Total Hasil: ${data.length} Data`;
-        document.getElementById('selectAllCheckbox').checked = false;
-        updateSelectedCount();
-
-        if(!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="py-4 text-center text-gray-400">Data tidak ditemukan.</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = data.map((item, index) => `
-            <tr class="border-b hover:bg-gray-50">
-                <td class="py-2 px-3 text-center">
-                    <input type="checkbox" class="row-checkbox rounded cursor-pointer" value="${index}" onchange="updateSelectedCount()">
-                </td>
-                <td class="py-2 px-3 font-semibold text-gray-500">
-                    <span class="bg-slate-100 text-slate-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase border border-slate-200">
-                        ${translateSheetName(item.sheetAsal)}
-                    </span>
-                </td>
-                <td class="py-2 px-3">${item.waktu || '-'}</td>
-                <td class="py-2 px-3 font-bold text-indigo-600">${item.odp || '-'}</td>
-                <td class="py-2 px-3">${item.pop || '-'}</td>
-                <td class="py-2 px-3">${item.cidLama || '-'} / ${item.namaLama || '-'}</td>
-                <td class="py-2 px-3 font-mono">${item.snUnit || '-'}</td>
-                <td class="py-2 px-3 text-center">
-                    ${item.urlFotoRumah ? `<a href="${item.urlFotoRumah}" target="_blank" class="text-indigo-600 underline font-bold">Rumah</a>` : '-'} | 
-                    ${item.urlFotoAlat ? `<a href="${item.urlFotoAlat}" target="_blank" class="text-indigo-600 underline font-bold">Alat</a>` : '-'}
-                </td>
-                <td class="py-2 px-3 text-center">
-                    <button onclick="sendSingleWA(${index})" 
-                        class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 mx-auto">
-                        <i class="fab fa-whatsapp"></i> WA
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    function toggleSelectAll(master) {
-        const checkboxes = document.querySelectorAll('.row-checkbox');
-        checkboxes.forEach(cb => cb.checked = master.checked);
-        updateSelectedCount();
-    }
-
-    function updateSelectedCount() {
-        const selected = document.querySelectorAll('.row-checkbox:checked');
-        document.getElementById('selectedCount').innerText = selected.length;
-    }
-
-    function buildWAMessage(item) {
-        let text = `*📌 LAPORAN DATA LAPANGAN*\n`;
-        text += `*Sumber Data:* Sheet (${translateSheetName(item.sheetAsal)})\n`;
-        text += `------------------------------------\n`;
-        text += `*Waktu:* ${item.waktu}\n`;
-        text += `*ODP:* ${item.odp}\n`;
-        text += `*POP:* ${item.pop}\n`;
-        text += `*CID Lama:* ${item.cidLama}\n`;
-        text += `*Nama Lama:* ${item.namaLama}\n`;
-        text += `*SN Unit:* ${item.snUnit}\n`;
-        if(item.koordinat) text += `*Koordinat:* ${item.koordinat}\n`;
-        if(item.keterangan) text += `*Ket:* ${item.keterangan}\n`;
-        text += `------------------------------------\n`;
-        if(item.koordinat) text += `📍 *Maps:* https://maps.google.com/?q=${item.koordinat}\n`;
-        if(item.urlFotoRumah) text += `🖼️ *Foto Rumah:* ${item.urlFotoRumah}\n`;
-        if(item.urlFotoAlat) text += `🖼️ *Foto Perangkat:* ${item.urlFotoAlat}`;
         
-        return encodeURIComponent(text);
+
+      renderAdminTable(filteredAdminData);
+}
+
+function renderAdminTable(data) {
+    const tbody = document.getElementById('tableBodyAdmin');
+    document.getElementById('searchResultCount').innerText = `Total Hasil: ${data.length} Data`;
+    document.getElementById('selectAllCheckbox').checked = false;
+    updateSelectedCount();
+
+    if(!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="py-4 text-center text-gray-400">Data tidak ditemukan.</td></tr>';
+        return;
     }
 
-    function sendSingleWA(index) {
+    tbody.innerHTML = data.map((item, index) => `
+        <tr class="border-b hover:bg-gray-50">
+            <td class="py-2 px-3 text-center">
+                <input type="checkbox" class="row-checkbox rounded cursor-pointer" value="${index}" onchange="updateSelectedCount()">
+            </td>
+            <td class="py-2 px-3 font-semibold text-gray-500">
+                <span class="bg-slate-100 text-slate-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase border border-slate-200">
+                    ${translateSheetName(item.sheetAsal)}
+                </span>
+            </td>
+            <td class="py-2 px-3">${item.waktu || '-'}</td>
+            <td class="py-2 px-3 font-bold text-indigo-600">${item.odp || '-'}</td>
+            <td class="py-2 px-3">${item.pop || '-'}</td>
+            <td class="py-2 px-3">${item.cidLama || '-'} / ${item.namaLama || '-'}</td>
+            <td class="py-2 px-3 font-mono">${item.snUnit || '-'}</td>
+            <td class="py-2 px-3 text-center">
+                ${item.urlFotoRumah ? `<a href="${item.urlFotoRumah}" target="_blank" class="text-indigo-600 underline font-bold">Rumah</a>` : '-'} | 
+                ${item.urlFotoAlat ? `<a href="${item.urlFotoAlat}" target="_blank" class="text-indigo-600 underline font-bold">Alat</a>` : '-'}
+            </td>
+            <td class="py-2 px-3 text-center">
+                <button onclick="sendSingleWA(${index})" 
+                    class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 mx-auto">
+                    <i class="fab fa-whatsapp"></i> WA
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function toggleSelectAll(master) {
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = master.checked);
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const selected = document.querySelectorAll('.row-checkbox:checked');
+    document.getElementById('selectedCount').innerText = selected.length;
+}
+
+function buildWAMessage(item) {
+    let text = `*📌 LAPORAN DATA LAPANGAN*\n`;
+    text += `*Sumber Data:* Sheet (${translateSheetName(item.sheetAsal)})\n`;
+    text += `------------------------------------\n`;
+    text += `*Waktu:* ${item.waktu || '-'}\n`;
+    text += `*ODP:* ${item.odp || '-'}\n`;
+    text += `*POP:* ${item.pop || '-'}\n`;
+    text += `*CID Lama:* ${item.cidLama || '-'}\n`;
+    text += `*Nama Lama:* ${item.namaLama || '-'}\n`;
+    text += `*SN Unit:* ${item.snUnit || '-'}\n`;
+    if(item.koordinat) text += `*Koordinat:* ${item.koordinat}\n`;
+    if(item.keterangan) text += `*Ket:* ${item.keterangan}\n`;
+    text += `------------------------------------\n`;
+    if(item.koordinat) text += `📍 *Maps:* https://maps.google.com/?q=${item.koordinat}\n`;
+    if(item.urlFotoRumah) text += `🖼️ *Foto Rumah:* ${item.urlFotoRumah}\n`;
+    if(item.urlFotoAlat) text += `🖼️ *Foto Perangkat:* ${item.urlFotoAlat}`;
+    
+    return encodeURIComponent(text);
+}
+
+function sendSingleWA(index) {
+    const item = filteredAdminData[index];
+    if(!item) return;
+
+    const encodedMessage = buildWAMessage(item);
+    window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
+}
+
+// FIX 1: Kirim Terpisah Sekaligus (1 Data = 1 WA) dengan Async/Await Delay 2 Detik
+async function sendSelectedToWA() {
+    const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
+    if(selectedBoxes.length === 0) {
+        return showToast("Pilih minimal 1 data untuk dikirim!");
+    }
+
+    if(!confirm(`Akan membuka ${selectedBoxes.length} tab WhatsApp secara berurutan. Lanjutkan?`)) return;
+
+    for (let i = 0; i < selectedBoxes.length; i++) {
+        const index = parseInt(selectedBoxes[i].value);
         const item = filteredAdminData[index];
-        if(!item) return;
-
-        const encodedMessage = buildWAMessage(item);
-        window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
-    }
-
-    function sendSelectedToWA() {
-        const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
-        if(selectedBoxes.length === 0) {
-            return showToast("Pilih minimal 1 data untuk dikirim!");
-        }
-
-        let delay = 0;
-        selectedBoxes.forEach(box => {
-            const index = parseInt(box.value);
-            const item = filteredAdminData[index];
-            if(item) {
-                setTimeout(() => {
-                    const encodedMessage = buildWAMessage(item);
-                    window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
-                }, delay);
-                delay += 1000;
+        
+        if(item) {
+            const encodedMessage = buildWAMessage(item);
+            window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
+            
+            // JEDA 2 DETIK (2000 ms) agar tidak diblokir Pop-up Browser
+            if (i < selectedBoxes.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
             }
-        });
+        }
     }
-
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.style.bottom = '20px';
-        setTimeout(() => t.style.bottom = '-100px', 3000);
-    }
-
-    // Variable global untuk menyimpan data pencarian/rekap
-let dataTerpilih = [];
-
-// Function 1: Mengambil data centang dari tabel
-function getCheckedRows() {
-  const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-  const selectedData = [];
-  
-  checkboxes.forEach(cb => {
-    // Mengambil objek data yang tersimpan di baris tabel
-    const index = cb.getAttribute('data-index');
-    if (window.currentRekapData && window.currentRekapData[index]) {
-      selectedData.push(window.currentRekapData[index]);
-    }
-  });
-
-  return selectedData;
 }
 
-// Function 2: Kirim Sekaligus (1 Data = 1 Pesan) dengan Jeda/Delay
-async function kirimTerpisahSekaligus() {
-  const selectedData = getCheckedRows();
-  
-  if (selectedData.length === 0) {
-    alert("Pilih minimal satu data yang ingin dikirim!");
-    return;
-  }
-
-  const noHpTujuan = prompt("Masukkan Nomor WA Tujuan (Contoh: 628123456789):");
-  if (!noHpTujuan) return;
-
-  const confirmSend = confirm(`Akan mengirim ${selectedData.length} pesan terpisah. Lanjutkan?`);
-  if (!confirmSend) return;
-
-  for (let i = 0; i < selectedData.length; i++) {
-    const item = selectedData[i];
-    
-    // Format teks pesan per item
-    let pesan = `*DETAIL DATA* (${i + 1}/${selectedData.length})\n`;
-    pesan += `Nama: ${item.namaLama || '-'}\n`;
-    pesan += `CID: ${item.cidLama || '-'}\n`;
-    pesan += `ODP: ${item.odp || '-'}\n`;
-    pesan += `POP: ${item.pop || '-'}\n`;
-    pesan += `SN Unit: ${item.snUnit || '-'}\n`;
-    pesan += `Sheet: ${item.sheetAsal || '-'}\n`;
-
-    const encodedText = encodeURIComponent(pesan);
-    const waUrl = `https://api.whatsapp.com/send?phone=${noHpTujuan}&text=${encodedText}`;
-    
-    // Buka tab baru untuk setiap pesan
-    window.open(waUrl, '_blank');
-
-    // JEDA 2 DETIK agar browser & WA Web tidak memblokir pop-up beruntun
-    if (i < selectedData.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+// FITUR BARU: Kirim Gabungan Semuanya menjadi 1 Pesan WA
+function sendGroupToWA() {
+    const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
+    if(selectedBoxes.length === 0) {
+        return showToast("Pilih minimal 1 data untuk digabungkan!");
     }
-  }
+
+    let groupText = `*📋 REKAP GABUNGAN (${selectedBoxes.length} DATA LAPANGAN)*\n`;
+    groupText += `====================================\n\n`;
+
+    selectedBoxes.forEach((box, idx) => {
+        const index = parseInt(box.value);
+        const item = filteredAdminData[index];
+        if(item) {
+            groupText += `*${idx + 1}. ${item.namaLama || 'Tanpa Nama'}*\n`;
+            groupText += `• ODP: ${item.odp || '-'}\n`;
+            groupText += `• POP: ${item.pop || '-'}\n`;
+            groupText += `• CID: ${item.cidLama || '-'}\n`;
+            groupText += `• SN: ${item.snUnit || '-'}\n`;
+            groupText += `• Sheet: ${translateSheetName(item.sheetAsal)}\n`;
+            if(item.keterangan) groupText += `• Ket: ${item.keterangan}\n`;
+            groupText += `------------------------------------\n`;
+        }
+    });
+
+    const encodedMessage = encodeURIComponent(groupText);
+    window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
 }
 
-// Function 3: FITUR BARU - Kirim Pesan Gabungan (All in 1 Message)
-function kirimPesanGabungan() {
-  const selectedData = getCheckedRows();
-  
-  if (selectedData.length === 0) {
-    alert("Pilih minimal satu data untuk digabungkan!");
-    return;
-  }
-
-  const noHpTujuan = prompt("Masukkan Nomor WA Tujuan (Contoh: 628123456789):");
-  if (!noHpTujuan) return;
-
-  // Menyusun header pesan gabungan
-  let pesanGabungan = `*REKAP DATA TERPILIH (${selectedData.length} ITEM)*\n`;
-  pesanGabungan += `==========================\n\n`;
-
-  // Melakukan looping gabungkan seluruh item ke dalam 1 string
-  selectedData.forEach((item, index) => {
-    pesanGabungan += `*${index + 1}. ${item.namaLama || 'No Name'}*\n`;
-    pesanGabungan += `• CID: ${item.cidLama || '-'}\n`;
-    pesanGabungan += `• ODP: ${item.odp || '-'}\n`;
-    pesanGabungan += `• POP: ${item.pop || '-'}\n`;
-    pesanGabungan += `• SN: ${item.snUnit || '-'}\n`;
-    pesanGabungan += `• Sheet: ${item.sheetAsal || '-'}\n`;
-    pesanGabungan += `--------------------------\n`;
-  });
-
-  // Kirim 1 pesan ringkasan penuh
-  const encodedText = encodeURIComponent(pesanGabungan);
-  const waUrl = `https://api.whatsapp.com/send?phone=${noHpTujuan}&text=${encodedText}`;
-  
-  window.open(waUrl, '_blank');
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.style.bottom = '20px';
+    setTimeout(() => t.style.bottom = '-100px', 3000);
 }
+
+
+
+
 </script>
