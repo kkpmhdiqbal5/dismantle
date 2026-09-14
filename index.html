@@ -1,28 +1,31 @@
-<!-- TAILWIND CSS & FONT AWESOME -->
+<!-- DEPENDENCIES EXTERNAL -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- LEAFLET PETA -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- HTML5 QRCODE SCANNER -->
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
+    /* RESET STYLE SUPAYA PAS DENGAN LAYAR BLOGGER */
     .app-wrapper {
         font-family: 'Plus Jakarta Sans', sans-serif;
         background-color: #F1F5F9;
         min-height: 100vh;
-        margin: -20px; /* Menutupi margin bawaan template blogger */
+        width: 100%;
+        margin: 0 auto;
         padding: 0;
+        box-sizing: border-box;
     }
+
     #field-map {
-        height: 180px;
+        height: 160px;
         width: 100%;
         border-radius: 12px;
         z-index: 10;
     }
+
     .toast-msg {
         position: fixed;
         bottom: -100px;
@@ -30,55 +33,64 @@
         transform: translateX(-50%);
         background: #0f172a;
         color: white;
-        padding: 12px 24px;
+        padding: 10px 20px;
         border-radius: 99px;
         transition: all 0.3s ease;
         z-index: 1000;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
         white-space: nowrap;
     }
+
+    /* Penyesuaian responsif input HP */
+    input, select, textarea, button {
+        font-size: 12px !important;
+    }
 </style>
 
-<div class="app-wrapper flex flex-col">
+<div class="app-wrapper flex flex-col min-h-screen">
 
-    <!-- HEADER -->
-    <header class="bg-white border-b px-6 py-3 flex justify-between items-center sticky top-0 z-40 shadow-sm">
-        <h1 class="text-base font-bold text-gray-800">Sistem Lapangan</h1>
+    <!-- HEADER / BAR ATAS -->
+    <header class="bg-white border-b px-4 py-3 flex justify-between items-center sticky top-0 z-40 shadow-sm w-full">
+        <h1 class="text-sm font-bold text-gray-800">Sistem Lapangan</h1>
         <div id="authArea">
             <button onclick="openLoginAdminModal()" id="btnLoginAdmin"
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-1.5 rounded-lg text-xs transition-all">
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-all">
                 Login Admin
             </button>
             <div id="adminBadge" class="hidden flex items-center gap-2">
-                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Admin</span>
+                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Admin</span>
                 <button onclick="logoutAdmin()" class="text-xs text-red-500 font-bold hover:underline">Keluar</button>
             </div>
         </div>
     </header>
 
-    <!-- FORM INPUT LAPANGAN (PEGAWAI) -->
-    <main id="viewPegawai" class="flex-1 py-6 px-4 flex justify-center items-start">
-        <div class="w-full max-w-md bg-white rounded-2xl shadow-md border border-gray-100 p-5 space-y-4">
+    <!-- CONTAINER UTAMA PEGAWAI (RESPONSIF MOBILE FIRST) -->
+    <main id="viewPegawai" class="flex-1 p-3 sm:p-5 flex justify-center items-start w-full">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3.5">
             
-            <div class="bg-[#0284c7] text-white p-3.5 rounded-xl text-center shadow-sm">
-                <p class="text-xs font-bold leading-relaxed">
+            <!-- BANNER DESKRIPSI -->
+            <div class="bg-[#0284c7] text-white p-3 rounded-xl text-center shadow-sm">
+                <p class="text-[11px] font-bold leading-relaxed">
                     Dashboard Utama: Peta Satelit Google Hybrid Otomatis Melacak Posisi Lapangan Anda.
                 </p>
             </div>
 
+            <!-- CONTAINER PETA -->
             <div class="rounded-xl overflow-hidden border border-gray-200 bg-gray-100 relative">
                 <div id="field-map"></div>
             </div>
 
-            <form id="formLapangan" onsubmit="handleFormSubmit(event)" class="space-y-3.5">
+            <!-- FORM INPUT DATA LAPANGAN -->
+            <form id="formLapangan" onsubmit="handleFormSubmit(event)" class="space-y-3">
+                
                 <div>
                     <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">
                         KOORDINAT TERDETEKSI OTOMATIS
                     </label>
                     <input type="text" id="inpKoordinat" readonly placeholder="Mengunci sinyal satelit GPS..."
-                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-gray-700 outline-none">
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-700 outline-none">
                 </div>
 
                 <div>
@@ -86,7 +98,7 @@
                         ODP TERDAFTAR / BARU *
                     </label>
                     <input type="text" id="inpOdp" required placeholder="Pilih ODP atau ketik baru"
-                        class="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 outline-none focus:border-indigo-500">
+                        class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-gray-800 outline-none focus:border-indigo-500">
                 </div>
 
                 <div>
@@ -94,41 +106,41 @@
                         POP *
                     </label>
                     <input type="text" id="inpPop" required placeholder="Masukkan data nama POP"
-                        class="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 outline-none focus:border-indigo-500">
+                        class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-gray-800 outline-none focus:border-indigo-500">
                 </div>
 
-                <div class="grid grid-cols-2 gap-2.5">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">
                             CID LAMA *
                         </label>
                         <input type="text" id="inpCidLama" required placeholder="Ex: CID10"
-                            class="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 outline-none focus:border-indigo-500">
+                            class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-gray-800 outline-none focus:border-indigo-500">
                     </div>
                     <div>
                         <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">
                             NAMA LAMA *
                         </label>
                         <input type="text" id="inpNamaLama" required placeholder="Ex: Budiman"
-                            class="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 outline-none focus:border-indigo-500">
+                            class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-gray-800 outline-none focus:border-indigo-500">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2.5 pt-1">
+                <div class="grid grid-cols-2 gap-2 pt-1">
                     <div>
                         <input type="file" id="fileFotoRumah" accept="image/*" capture="environment" class="hidden" onchange="updateFileLabel('fileFotoRumah', 'btnFotoRumahLabel')">
                         <button type="button" onclick="document.getElementById('fileFotoRumah').click()"
-                            class="w-full border-2 border-dashed border-gray-300 rounded-xl py-2.5 px-2 text-center hover:bg-gray-50 transition-all flex items-center justify-center gap-1.5">
+                            class="w-full border-2 border-dashed border-gray-300 rounded-xl py-2 px-1 text-center hover:bg-gray-50 transition-all flex items-center justify-center gap-1">
                             <i class="fas fa-camera text-gray-500 text-xs"></i>
-                            <span id="btnFotoRumahLabel" class="text-[10px] font-extrabold text-gray-600 uppercase">FOTO RUMAH *</span>
+                            <span id="btnFotoRumahLabel" class="text-[9px] font-extrabold text-gray-600 uppercase truncate">FOTO RUMAH *</span>
                         </button>
                     </div>
                     <div>
                         <input type="file" id="fileFotoAlat" accept="image/*" capture="environment" class="hidden" onchange="updateFileLabel('fileFotoAlat', 'btnFotoAlatLabel')">
                         <button type="button" onclick="document.getElementById('fileFotoAlat').click()"
-                            class="w-full border-2 border-dashed border-gray-300 rounded-xl py-2.5 px-2 text-center hover:bg-gray-50 transition-all flex items-center justify-center gap-1.5">
+                            class="w-full border-2 border-dashed border-gray-300 rounded-xl py-2 px-1 text-center hover:bg-gray-50 transition-all flex items-center justify-center gap-1">
                             <i class="fas fa-camera text-gray-500 text-xs"></i>
-                            <span id="btnFotoAlatLabel" class="text-[10px] font-extrabold text-gray-600 uppercase">FOTO ALAT *</span>
+                            <span id="btnFotoAlatLabel" class="text-[9px] font-extrabold text-gray-600 uppercase truncate">FOTO ALAT *</span>
                         </button>
                     </div>
                 </div>
@@ -138,10 +150,10 @@
                         SERIAL NUMBER (SN) UNIT *
                     </label>
                     <div class="flex gap-2">
-                        <input type="text" id="inpSnUnit" required placeholder="Ketuk tombol Scan SN ->"
-                            class="flex-1 bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 outline-none focus:border-indigo-500">
+                        <input type="text" id="inpSnUnit" required placeholder="Ketuk Scan SN ->"
+                            class="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-gray-800 outline-none focus:border-indigo-500">
                         <button type="button" onclick="triggerScanSN()"
-                            class="bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[11px] px-4 py-2.5 rounded-xl shadow-sm transition-all whitespace-nowrap">
+                            class="bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[10px] px-3.5 py-2 rounded-xl shadow-sm transition-all whitespace-nowrap">
                             Scan SN
                         </button>
                     </div>
@@ -152,42 +164,42 @@
                         KETERANGAN (OPSIONAL)
                     </label>
                     <textarea id="inpKeterangan" rows="2" placeholder="Catatan kendala lapangan jika ada..."
-                        class="w-full bg-white border border-gray-200 rounded-xl p-3 text-xs text-gray-800 outline-none focus:border-indigo-500"></textarea>
+                        class="w-full bg-white border border-gray-200 rounded-xl p-2.5 text-gray-800 outline-none focus:border-indigo-500"></textarea>
                 </div>
 
                 <button type="submit" id="btnSubmit"
-                    class="w-full bg-[#0f2942] hover:bg-[#091b2c] text-white font-bold py-3.5 rounded-xl shadow-md transition-all text-xs tracking-wide mt-2">
+                    class="w-full bg-[#0f2942] hover:bg-[#091b2c] text-white font-bold py-3 rounded-xl shadow-md transition-all text-xs tracking-wide mt-2">
                     Kirim Data Lapangan
                 </button>
             </form>
         </div>
     </main>
 
-    <!-- DASHBOARD ADMIN -->
-    <main id="viewAdmin" class="hidden flex-1 p-6 max-w-6xl mx-auto w-full space-y-6">
+    <!-- CONTAINER REKAP DATA ADMIN -->
+    <main id="viewAdmin" class="hidden flex-1 p-3 sm:p-6 max-w-5xl mx-auto w-full space-y-4">
         <div class="flex justify-between items-center">
-            <h2 class="text-xl font-extrabold text-gray-800">Panel Admin - Rekap Data</h2>
-            <button onclick="switchToPegawaiView()" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl text-xs font-bold">
-                <i class="fas fa-arrow-left mr-1"></i> Kembali ke Form Lapangan
+            <h2 class="text-base font-extrabold text-gray-800">Panel Admin</h2>
+            <button onclick="switchToPegawaiView()" class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-xl text-xs font-bold">
+                <i class="fas fa-arrow-left mr-1"></i> Form Lapangan
             </button>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-4 border-b flex justify-between items-center">
-                <h3 class="font-bold text-sm text-gray-700">Riwayat Laporan Lapangan</h3>
+            <div class="p-3 border-b flex justify-between items-center">
+                <h3 class="font-bold text-xs text-gray-700">Riwayat Laporan Lapangan</h3>
                 <button onclick="loadAdminData()" class="text-indigo-600 text-xs font-bold"><i class="fas fa-sync-alt"></i> Refresh</button>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-xs">
-                    <thead class="bg-slate-900 text-white uppercase text-[10px]">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-900 text-white uppercase text-[9px]">
                         <tr>
-                            <th class="py-3 px-3 text-left">Waktu</th>
-                            <th class="py-3 px-3 text-left">ODP</th>
-                            <th class="py-3 px-3 text-left">POP</th>
-                            <th class="py-3 px-3 text-left">CID / Nama Lama</th>
-                            <th class="py-3 px-3 text-left">SN Unit</th>
-                            <th class="py-3 px-3 text-center">Foto</th>
-                            <th class="py-3 px-3 text-center">Lokasi</th>
+                            <th class="py-2.5 px-3">Waktu</th>
+                            <th class="py-2.5 px-3">ODP</th>
+                            <th class="py-2.5 px-3">POP</th>
+                            <th class="py-2.5 px-3">CID / Nama</th>
+                            <th class="py-2.5 px-3">SN Unit</th>
+                            <th class="py-2.5 px-3 text-center">Foto</th>
+                            <th class="py-2.5 px-3 text-center">Maps</th>
                         </tr>
                     </thead>
                     <tbody id="tableBodyAdmin">
@@ -202,13 +214,13 @@
 
     <!-- MODAL SCANNER BARCODE -->
     <div id="modalScanner" class="fixed inset-0 z-[600] bg-black/80 backdrop-blur-sm hidden flex-col items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-4 space-y-4 shadow-2xl relative">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-4 space-y-3 shadow-2xl relative">
             <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="text-sm font-bold text-gray-800"><i class="fas fa-qrcode mr-1"></i> Arahkan ke Barcode / SN</h3>
-                <button onclick="closeScanner()" class="text-gray-400 hover:text-red-500 font-bold text-lg">&times;</button>
+                <h3 class="text-xs font-bold text-gray-800"><i class="fas fa-qrcode mr-1"></i> Scan Barcode SN</h3>
+                <button onclick="closeScanner()" class="text-gray-400 hover:text-red-500 font-bold text-base">&times;</button>
             </div>
-            <div id="reader" class="w-full overflow-hidden rounded-xl bg-black min-h-[220px]"></div>
-            <button onclick="closeScanner()" class="w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl font-bold text-xs">
+            <div id="reader" class="w-full overflow-hidden rounded-xl bg-black min-h-[200px]"></div>
+            <button onclick="closeScanner()" class="w-full bg-gray-100 text-gray-700 py-2 rounded-xl font-bold text-xs">
                 Batal
             </button>
         </div>
@@ -216,17 +228,17 @@
 
     <!-- MODAL LOGIN ADMIN -->
     <div id="modalLoginAdmin" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-xl">
+        <div class="bg-white rounded-2xl max-w-xs w-full p-5 space-y-4 shadow-xl">
             <div class="text-center">
-                <h3 class="text-lg font-bold text-gray-900">Login Administrator</h3>
-                <p class="text-xs text-gray-500">Masukan kata sandi admin</p>
+                <h3 class="text-base font-bold text-gray-900">Login Admin</h3>
+                <p class="text-[11px] text-gray-500">Masukan kata sandi admin</p>
             </div>
             <div class="space-y-3">
                 <input type="password" id="adminPassword" placeholder="Kata Sandi Admin"
-                    class="w-full px-4 py-3 bg-gray-50 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-600 font-bold">
+                    class="w-full px-3 py-2 bg-gray-50 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-600 font-bold">
                 <div class="flex gap-2">
-                    <button onclick="closeLoginAdminModal()" class="flex-1 py-3 text-xs font-bold text-gray-500">Batal</button>
-                    <button onclick="submitAdminLogin()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold shadow-md">Masuk</button>
+                    <button onclick="closeLoginAdminModal()" class="flex-1 py-2 text-xs font-bold text-gray-500">Batal</button>
+                    <button onclick="submitAdminLogin()" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-xs font-bold shadow-md">Masuk</button>
                 </div>
             </div>
         </div>
@@ -236,7 +248,7 @@
 </div>
 
 <script>
-    // ⚠️ PASTE URL WEB APP APPS SCRIPT ANDA DI SINI
+    // ⚠️ PASTE URL WEB APP GOOGLE APPS SCRIPT KAMU DI SINI:
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9RClIPxWasSJs17V7raPEWP8LHZ9RDHQ6kRETwdLaO3IOSmLgvIq-0Vri36lGRKi7TA/exec";
 
     let map, userMarker;
@@ -249,14 +261,11 @@
         checkAdminSession();
     });
 
-    // PETA GPS
     function initGPSMap() {
         const mapContainer = document.getElementById('field-map');
         map = L.map(mapContainer, { zoomControl: false }).setView([-6.200000, 106.816666], 15);
         
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
-        }).addTo(map);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(pos => {
@@ -266,9 +275,9 @@
                 if (!userMarker) {
                     const icon = L.divIcon({
                         className: '',
-                        html: '<div style="width:14px;height:14px;background:#3b82f6;border:3px solid white;border-radius:50%;box-shadow:0 0 10px rgba(59,130,246,0.8)"></div>',
-                        iconSize: [14, 14],
-                        iconAnchor: [7, 7]
+                        html: '<div style="width:12px;height:12px;background:#3b82f6;border:2px solid white;border-radius:50%;box-shadow:0 0 8px rgba(59,130,246,0.8)"></div>',
+                        iconSize: [12, 12],
+                        iconAnchor: [6, 6]
                     });
                     userMarker = L.marker([currentCoords.lat, currentCoords.lng], { icon: icon }).addTo(map);
                 } else {
@@ -276,12 +285,11 @@
                 }
                 map.setView([currentCoords.lat, currentCoords.lng], 16);
             }, err => {
-                document.getElementById('inpKoordinat').value = "GPS tidak aktif / terblokir.";
+                document.getElementById('inpKoordinat').value = "GPS Aktifkan Lokasi HP!";
             }, { enableHighAccuracy: true });
         }
     }
 
-    // SCANNER SN
     function triggerScanSN() {
         const modal = document.getElementById('modalScanner');
         modal.classList.replace('hidden', 'flex');
@@ -290,19 +298,19 @@
             html5QrCode = new Html5Qrcode("reader");
         }
 
-        const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+        const config = { fps: 10, qrbox: { width: 200, height: 120 } };
 
         html5QrCode.start(
             { facingMode: "environment" }, 
             config, 
             (decodedText) => {
                 document.getElementById('inpSnUnit').value = decodedText;
-                showToast("SN Terdeteksi: " + decodedText);
+                showToast("SN: " + decodedText);
                 closeScanner();
             },
             (err) => {}
         ).catch(err => {
-            showToast("Kamera gagal diakses: " + err);
+            showToast("Kamera error: " + err);
             closeScanner();
         });
     }
@@ -321,12 +329,11 @@
         const input = document.getElementById(inputId);
         const label = document.getElementById(labelId);
         if (input.files && input.files[0]) {
-            label.innerText = "✓ " + input.files[0].name.substring(0, 10) + "...";
+            label.innerText = "✓ " + input.files[0].name.substring(0, 8) + "...";
             label.classList.add("text-emerald-600");
         }
     }
 
-    // KIRIM DATA FORM DARI BLOGGER KE GOOGLE APPS SCRIPT
     function handleFormSubmit(e) {
         e.preventDefault();
         const btn = document.getElementById('btnSubmit');
@@ -334,10 +341,10 @@
         const fileAlat = document.getElementById('fileFotoAlat').files[0];
 
         if(!fileRumah || !fileAlat) {
-            return showToast("Unggah Foto Rumah & Foto Alat wajib diisi!");
+            return showToast("Foto Rumah & Foto Perangkat Wajib!");
         }
 
-        btn.innerText = "Mengirim Data...";
+        btn.innerText = "Mengirim...";
         btn.disabled = true;
 
         const readerRumah = new FileReader();
@@ -375,7 +382,7 @@
                 .catch(err => {
                     btn.innerText = "Kirim Data Lapangan";
                     btn.disabled = false;
-                    showToast("Gagal terhubung ke server");
+                    showToast("Gagal koneksi server!");
                 });
             };
             readerAlat.readAsDataURL(fileAlat);
@@ -383,7 +390,6 @@
         readerRumah.readAsDataURL(fileRumah);
     }
 
-    // ADMIN MODAL & TABEL LOGIC
     function openLoginAdminModal() {
         document.getElementById('modalLoginAdmin').classList.replace('hidden', 'flex');
     }
@@ -406,7 +412,7 @@
                 closeLoginAdminModal();
                 switchToAdminView();
             } else {
-                showToast("Password Admin Salah!");
+                showToast("Password Salah!");
             }
         });
     }
@@ -427,7 +433,7 @@
         sessionStorage.removeItem('admin_session');
         checkAdminSession();
         switchToPegawaiView();
-        showToast("Berhasil Keluar Admin");
+        showToast("Logout Admin");
     }
 
     function switchToAdminView() {
@@ -455,22 +461,22 @@
     function renderAdminTable(data) {
         const tbody = document.getElementById('tableBodyAdmin');
         if(!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-gray-400">Belum ada data rekapan.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-400">Belum ada data.</td></tr>';
             return;
         }
         tbody.innerHTML = data.map(item => `
             <tr class="border-b hover:bg-gray-50">
-                <td class="py-3 px-3">${item.waktu || '-'}</td>
-                <td class="py-3 px-3 font-bold">${item.odp}</td>
-                <td class="py-3 px-3">${item.pop}</td>
-                <td class="py-3 px-3">${item.cidLama} / ${item.namaLama}</td>
-                <td class="py-3 px-3 font-mono">${item.snUnit}</td>
-                <td class="py-3 px-3 text-center">
+                <td class="py-2 px-3">${item.waktu || '-'}</td>
+                <td class="py-2 px-3 font-bold">${item.odp}</td>
+                <td class="py-2 px-3">${item.pop}</td>
+                <td class="py-2 px-3">${item.cidLama} / ${item.namaLama}</td>
+                <td class="py-2 px-3 font-mono">${item.snUnit}</td>
+                <td class="py-2 px-3 text-center">
                     <a href="${item.urlFotoRumah}" target="_blank" class="text-indigo-600 underline font-bold">Rumah</a> | 
-                    <a href="${item.urlFotoAlat}" target="_blank" class="text-indigo-600 underline font-bold">Alat</a>
+                    <a href="${item.urlFotoAlat}" target="_blank" class="text-indigo-600 underline font-bold">Perangkat</a>
                 </td>
-                <td class="py-3 px-3 text-center">
-                    <a href="https://maps.google.com/?q=${item.koordinat}" target="_blank" class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded font-bold">Map</a>
+                <td class="py-2 px-3 text-center">
+                    <a href="https://maps.google.com/?q=${item.koordinat}" target="_blank" class="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-bold">Map</a>
                 </td>
             </tr>
         `).join('');
@@ -479,7 +485,7 @@
     function showToast(msg) {
         const t = document.getElementById('toast');
         t.innerText = msg;
-        t.style.bottom = '30px';
+        t.style.bottom = '20px';
         setTimeout(() => t.style.bottom = '-100px', 3000);
     }
 </script>
