@@ -650,6 +650,7 @@ function updateSelectedCount() {
     document.getElementById('selectedCount').innerText = selected.length;
 }
 
+// 1. FORMAT PESAN TERPISAH (INDIVIDUAL / 1 DATA = 1 WA)
 function buildWAMessage(item) {
     let text = `*📌 LAPORAN DATA LAPANGAN*\n`;
     text += `*Sumber Data:* Sheet (${translateSheetName(item.sheetAsal)})\n`;
@@ -660,14 +661,23 @@ function buildWAMessage(item) {
     text += `*CID Lama:* ${item.cidLama || '-'}\n`;
     text += `*Nama Lama:* ${item.namaLama || '-'}\n`;
     text += `*SN Unit:* ${item.snUnit || '-'}\n`;
-    if(item.koordinat) text += `*Koordinat:* ${item.koordinat}\n`;
     if(item.keterangan) text += `*Ket:* ${item.keterangan}\n`;
     text += `------------------------------------\n`;
-    if(item.koordinat) text += `📍 *Maps:* https://maps.google.com/?q=${item.koordinat}\n`;
-    if(item.urlFotoRumah) text += `🖼️ *Foto Rumah:* ${item.urlFotoRumah}\n`;
-    if(item.urlFotoAlat) text += `🖼️ *Foto Perangkat:* ${item.urlFotoAlat}`;
     
-    return encodeURIComponent(text);
+    // SHERLOCK / GOOGLE MAPS
+    if(item.koordinat) {
+        text += `📍 *Sherlock (Maps):* https://maps.google.com/?q=${encodeURIComponent(item.koordinat)}\n`;
+    }
+    
+    // FOTO RUMAH & FOTO PERANGKAT
+    if(item.urlFotoRumah) {
+        text += `🖼️ *Foto Rumah:* ${item.urlFotoRumah}\n`;
+    }
+    if(item.urlFotoAlat) {
+        text += `🖼️ *Foto Perangkat:* ${item.urlFotoAlat}\n`;
+    }
+    
+    return encodeURIComponent(text.trim());
 }
 
 function sendSingleWA(index) {
@@ -703,7 +713,7 @@ async function sendSelectedToWA() {
     }
 }
 
-// FITUR BARU: Kirim Gabungan Semuanya menjadi 1 Pesan WA
+// 2. FORMAT PESAN GABUNGAN (ALL-IN-1 WA)
 function sendGroupToWA() {
     const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
     if(selectedBoxes.length === 0) {
@@ -724,11 +734,23 @@ function sendGroupToWA() {
             groupText += `• SN: ${item.snUnit || '-'}\n`;
             groupText += `• Sheet: ${translateSheetName(item.sheetAsal)}\n`;
             if(item.keterangan) groupText += `• Ket: ${item.keterangan}\n`;
+            
+            // TAMBAHAN SHERLOCK & FOTO DI PESAN GABUNGAN
+            if(item.koordinat) {
+                groupText += `📍 Sherlock: https://maps.google.com/?q=${encodeURIComponent(item.koordinat)}\n`;
+            }
+            if(item.urlFotoRumah) {
+                groupText += `🖼️ Foto Rumah: ${item.urlFotoRumah}\n`;
+            }
+            if(item.urlFotoAlat) {
+                groupText += `🖼️ Foto Alat: ${item.urlFotoAlat}\n`;
+            }
+            
             groupText += `------------------------------------\n`;
         }
     });
 
-    const encodedMessage = encodeURIComponent(groupText);
+    const encodedMessage = encodeURIComponent(groupText.trim());
     window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
 }
 
