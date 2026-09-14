@@ -596,7 +596,7 @@
         });
         
 
-      renderAdminTable(filteredAdminData);
+    renderAdminTable(filteredAdminData);
 }
 
 function renderAdminTable(data) {
@@ -650,7 +650,7 @@ function updateSelectedCount() {
     document.getElementById('selectedCount').innerText = selected.length;
 }
 
-// 1. FORMAT PESAN TERPISAH (INDIVIDUAL / 1 DATA = 1 WA)
+// FORMAT PESAN INDIVIDUAL (TERPISAH)
 function buildWAMessage(item) {
     let text = `*📌 LAPORAN DATA LAPANGAN*\n`;
     text += `*Sumber Data:* Sheet (${translateSheetName(item.sheetAsal)})\n`;
@@ -664,9 +664,9 @@ function buildWAMessage(item) {
     if(item.keterangan) text += `*Ket:* ${item.keterangan}\n`;
     text += `------------------------------------\n`;
     
-    // SHERLOCK / GOOGLE MAPS
+    // SHERLOCK (GOOGLE MAPS)
     if(item.koordinat) {
-        text += `📍 *Sherlock (Maps):* https://maps.google.com/?q=${encodeURIComponent(item.koordinat)}\n`;
+        text += `📍 *Sherlock:* https://maps.google.com/?q=${encodeURIComponent(item.koordinat)}\n`;
     }
     
     // FOTO RUMAH & FOTO PERANGKAT
@@ -688,7 +688,7 @@ function sendSingleWA(index) {
     window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
 }
 
-// FIX 1: Kirim Terpisah Sekaligus (1 Data = 1 WA) dengan Async/Await Delay 2 Detik
+// KIRIM TERPISAH DENGAN DELAY 2 DETIK
 async function sendSelectedToWA() {
     const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
     if(selectedBoxes.length === 0) {
@@ -705,7 +705,6 @@ async function sendSelectedToWA() {
             const encodedMessage = buildWAMessage(item);
             window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
             
-            // JEDA 2 DETIK (2000 ms) agar tidak diblokir Pop-up Browser
             if (i < selectedBoxes.length - 1) {
                 await new Promise(resolve => setTimeout(resolve, 2000));
             }
@@ -713,7 +712,7 @@ async function sendSelectedToWA() {
     }
 }
 
-// 2. FORMAT PESAN GABUNGAN (ALL-IN-1 WA)
+// KIRIM GABUNGAN (ALL-IN-1 WA) INCLUDING SHERLOCK & FOTO
 function sendGroupToWA() {
     const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
     if(selectedBoxes.length === 0) {
@@ -735,7 +734,7 @@ function sendGroupToWA() {
             groupText += `• Sheet: ${translateSheetName(item.sheetAsal)}\n`;
             if(item.keterangan) groupText += `• Ket: ${item.keterangan}\n`;
             
-            // TAMBAHAN SHERLOCK & FOTO DI PESAN GABUNGAN
+            // SHERLOCK & FOTO DI PESAN GABUNGAN
             if(item.koordinat) {
                 groupText += `📍 Sherlock: https://maps.google.com/?q=${encodeURIComponent(item.koordinat)}\n`;
             }
