@@ -58,27 +58,27 @@
 
 <div class="app-wrapper flex flex-col min-h-screen">
 
-    <!-- HEADER / BAR ATAS (DENGAN NAVIGASI ADMIN DAN LAPANGAN) -->
+    <!-- HEADER / BAR ATAS (NAVIGASI UTAMA PENGALIH TAMPILAN) -->
     <header class="bg-white border-b px-4 py-2.5 flex justify-between items-center sticky top-0 z-40 shadow-sm w-full">
         <div class="flex items-center gap-2">
-            <h1 class="text-xs sm:text-sm font-extrabold text-slate-800 tracking-tight">Sistem Lapangan</h1>
+            <h1 class="text-xs sm:text-sm font-extrabold text-slate-800 tracking-tight" id="headerTitle">Sistem Lapangan</h1>
         </div>
 
-        <!-- NAVIGASI ATAS -->
-        <div class="flex items-center gap-1.5">
+        <!-- TOMBOL NAVIGASI DUA ARAH -->
+        <div class="flex items-center gap-2">
             <!-- TOMBOL KE SISTEM LAPANGAN -->
-            <button onclick="switchToPegawaiView()" id="navBtnLapangan"
-                class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1 transition-all">
+            <button onclick="switchToPegawaiView()" id="btnNavLapangan"
+                class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1.5 transition-all">
                 <i class="fas fa-edit"></i> <span class="hidden sm:inline">Sistem</span> Lapangan
             </button>
 
-            <!-- TOMBOL DASHBOARD ADMIN -->
-            <button onclick="switchToAdminView()" id="navBtnAdmin"
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1">
+            <!-- TOMBOL KE DASHBOARD ADMIN -->
+            <button onclick="switchToAdminView()" id="btnNavAdmin"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 border border-gray-200">
                 <i class="fas fa-chart-line"></i> Dashboard <span class="hidden sm:inline">Admin</span>
             </button>
 
-            <!-- STATUS ADMIN & LOGOUT -->
+            <!-- STATUS ADMIN & LOGOUT (TAMPIL JIKA SUDAH LOGIN) -->
             <div id="adminBadge" class="hidden flex items-center gap-1.5 border-l pl-2 ml-1">
                 <span class="bg-indigo-100 text-indigo-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">Admin</span>
                 <button onclick="logoutAdmin()" class="text-xs text-red-500 font-bold hover:underline" title="Keluar Admin">
@@ -88,7 +88,7 @@
         </div>
     </header>
 
-    <!-- FORM INPUT PEGAWAI LAPANGAN -->
+    <!-- TAMPILAN 1: FORM INPUT PEGAWAI LAPANGAN -->
     <main id="viewPegawai" class="flex-1 p-3 sm:p-5 flex justify-center items-start w-full">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3.5">
             
@@ -193,10 +193,10 @@
         </div>
     </main>
 
-    <!-- DASHBOARD ADMIN DENGAN FILTER SHEET & SEARCH SPESIFIK -->
+    <!-- TAMPILAN 2: DASHBOARD ADMIN -->
     <main id="viewAdmin" class="hidden flex-1 p-3 sm:p-6 max-w-6xl mx-auto w-full space-y-4">
         <div class="flex justify-between items-center">
-            <h2 class="text-base font-extrabold text-gray-800">Panel Dashboard Admin</h2>
+            <h2 class="text-base font-extrabold text-gray-800">Panel Rekap Data Admin</h2>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -306,7 +306,7 @@
         <div class="bg-white rounded-2xl max-w-xs w-full p-5 space-y-4 shadow-xl">
             <div class="text-center">
                 <h3 class="text-base font-bold text-gray-900">Login Admin</h3>
-                <p class="text-[11px] text-gray-500">Masukan kata sandi admin</p>
+                <p class="text-[11px] text-gray-500">Masukkan kata sandi untuk ke Dashboard</p>
             </div>
             <div class="space-y-3">
                 <input type="password" id="adminPassword" placeholder="Kata Sandi Admin"
@@ -516,16 +516,20 @@
         showToast("Logout Admin");
     }
 
-    // FUNGSI PERPINDAHAN TAMPILAN VIA HEADER
+    // FUNGSI SWITCH NAVIGASI DUA ARAH
     function switchToAdminView() {
-        if(!isAdminLoggedIn) return openLoginAdminModal();
+        if(!isAdminLoggedIn) {
+            openLoginAdminModal();
+            return;
+        }
         
         document.getElementById('viewPegawai').classList.add('hidden');
         document.getElementById('viewAdmin').classList.remove('hidden');
+        document.getElementById('headerTitle').innerText = "Dashboard Admin";
         
-        // Style status aktif tombol
-        document.getElementById('navBtnAdmin').className = "bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1 transition-all";
-        document.getElementById('navBtnLapangan').className = "bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1";
+        // Ganti styling tombol navigasi aktif
+        document.getElementById('btnNavAdmin').className = "bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1.5 transition-all";
+        document.getElementById('btnNavLapangan').className = "bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 border border-gray-200";
         
         loadAdminData();
     }
@@ -533,10 +537,11 @@
     function switchToPegawaiView() {
         document.getElementById('viewAdmin').classList.add('hidden');
         document.getElementById('viewPegawai').classList.remove('hidden');
+        document.getElementById('headerTitle').innerText = "Sistem Lapangan";
         
-        // Style status aktif tombol
-        document.getElementById('navBtnLapangan').className = "bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1 transition-all";
-        document.getElementById('navBtnAdmin').className = "bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1";
+        // Ganti styling tombol navigasi aktif
+        document.getElementById('btnNavLapangan').className = "bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1.5 transition-all";
+        document.getElementById('btnNavAdmin').className = "bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 border border-gray-200";
         
         setTimeout(() => map.invalidateSize(), 300);
     }
