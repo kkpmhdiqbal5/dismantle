@@ -8,7 +8,6 @@
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
-    /* MELEPASKAN BATASAN TEMPLATE BLOGGER (FULL SCREEN FIX) */
     .post-body, .entry-content, .post, .article {
         padding: 0 !important;
         margin: 0 !important;
@@ -38,8 +37,8 @@
     .toast-msg {
         position: fixed;
         bottom: -100px;
-        left: 100%;
-        transform: translateX(100%);
+        left: 50%;
+        transform: translateX(-50%);
         background: #0f172a;
         color: white;
         padding: 10px 20px;
@@ -74,25 +73,21 @@
         </div>
     </header>
 
-    <!-- CONTAINER UTAMA PEGAWAI (RESPONSIF MOBILE FIRST) -->
+    <!-- FORM INPUT PEGAWAI LAPANGAN -->
     <main id="viewPegawai" class="flex-1 p-3 sm:p-5 flex justify-center items-start w-full">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3.5">
             
-            <!-- BANNER DESKRIPSI -->
             <div class="bg-[#0284c7] text-white p-3 rounded-xl text-center shadow-sm">
                 <p class="text-[11px] font-bold leading-relaxed">
                     Dashboard Utama: Peta Satelit Google Hybrid Otomatis Melacak Posisi Lapangan Anda.
                 </p>
             </div>
 
-            <!-- CONTAINER PETA -->
             <div class="rounded-xl overflow-hidden border border-gray-200 bg-gray-100 relative">
                 <div id="field-map"></div>
             </div>
 
-            <!-- FORM INPUT DATA LAPANGAN -->
             <form id="formLapangan" onsubmit="handleFormSubmit(event)" class="space-y-3">
-                
                 <div>
                     <label class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">
                         KOORDINAT TERDETEKSI OTOMATIS
@@ -183,8 +178,8 @@
         </div>
     </main>
 
-    <!-- CONTAINER REKAP DATA ADMIN -->
-    <main id="viewAdmin" class="hidden flex-1 p-3 sm:p-6 max-w-5xl mx-auto w-full space-y-4">
+    <!-- DASHBOARD ADMIN DENGAN FILTER SHEET & SEARCH SPESIFIK -->
+    <main id="viewAdmin" class="hidden flex-1 p-3 sm:p-6 max-w-6xl mx-auto w-full space-y-4">
         <div class="flex justify-between items-center">
             <h2 class="text-base font-extrabold text-gray-800">Panel Admin</h2>
             <button onclick="switchToPegawaiView()" class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-xl text-xs font-bold">
@@ -193,26 +188,86 @@
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-3 border-b flex justify-between items-center">
-                <h3 class="font-bold text-xs text-gray-700">Riwayat Laporan Lapangan</h3>
-                <button onclick="loadAdminData()" class="text-indigo-600 text-xs font-bold"><i class="fas fa-sync-alt"></i> Refresh</button>
+            
+            <!-- CONTROLLER PANEL ADMIN -->
+            <div class="p-3 bg-gray-50 border-b space-y-2">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <!-- FILTER ASAL SHEET -->
+                    <div>
+                        <label class="text-[9px] font-bold text-gray-500 uppercase">Pilih Sumber Sheet</label>
+                        <select id="filterSheet" onchange="filterAdminData()" class="w-full bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none focus:border-indigo-500">
+                            <option value="ALL">-- Semua Sheet --</option>
+                            <option value="Baris 1">Info Perangkat (Baris 1)</option>
+                            <option value="sudah diambil">sudah diambil</option>
+                            <option value="Full Data">Full Data</option>
+                            <option value="target">target</option>
+                            <option value="Laporan">Laporan</option>
+                        </select>
+                    </div>
+
+                    <!-- FILTER KRITERIA FIELD -->
+                    <div>
+                        <label class="text-[9px] font-bold text-gray-500 uppercase">Kriteria Cari</label>
+                        <select id="filterField" onchange="filterAdminData()" class="w-full bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none focus:border-indigo-500">
+                            <option value="ALL">Semua Kolom (ODP/CID/Nama/POP)</option>
+                            <option value="odp">ODP saja</option>
+                            <option value="cidLama">CID saja</option>
+                            <option value="namaLama">Nama saja</option>
+                            <option value="pop">POP saja</option>
+                        </select>
+                    </div>
+
+                    <!-- INPUT TEKS PENCARIAN -->
+                    <div>
+                        <label class="text-[9px] font-bold text-gray-500 uppercase">Kata Kunci</label>
+                        <div class="relative">
+                            <input type="text" id="adminSearchInput" onkeyup="filterAdminData()" 
+                                placeholder="Misal: garuda, CID10..." 
+                                class="w-full bg-white border border-gray-200 rounded-xl pl-8 pr-3 py-1.5 text-xs outline-none focus:border-indigo-500">
+                            <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-between items-center pt-1 gap-2 border-t border-gray-200/60">
+                    <span id="searchResultCount" class="text-[10px] font-bold text-gray-500">Memuat data...</span>
+
+                    <div class="flex items-center gap-2">
+                        <!-- TOMBOL MULTI-SEND WA -->
+                        <button onclick="sendSelectedToWA()" 
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all">
+                            <i class="fab fa-whatsapp text-sm"></i> Kirim Sekaligus (<span id="selectedCount">0</span>)
+                        </button>
+                        
+                        <button onclick="loadAdminData()" class="text-indigo-600 text-xs font-bold bg-white px-3 py-1.5 rounded-xl border border-gray-200 hover:bg-gray-100">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            <!-- TABEL DATA -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-900 text-white uppercase text-[9px]">
                         <tr>
+                            <th class="py-2.5 px-3 text-center">
+                                <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)" class="rounded cursor-pointer">
+                            </th>
+                            <th class="py-2.5 px-3">Sumber Sheet</th>
                             <th class="py-2.5 px-3">Waktu</th>
                             <th class="py-2.5 px-3">ODP</th>
                             <th class="py-2.5 px-3">POP</th>
                             <th class="py-2.5 px-3">CID / Nama</th>
                             <th class="py-2.5 px-3">SN Unit</th>
                             <th class="py-2.5 px-3 text-center">Foto</th>
-                            <th class="py-2.5 px-3 text-center">Maps</th>
+                            <th class="py-2.5 px-3 text-center">Aksi WA</th>
                         </tr>
                     </thead>
                     <tbody id="tableBodyAdmin">
                         <tr>
-                            <td colspan="7" class="py-4 text-center text-gray-400">Memuat data...</td>
+                            <td colspan="9" class="py-4 text-center text-gray-400">Memuat data...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -256,12 +311,21 @@
 </div>
 
 <script>
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby9RClIPxWasSJs17V7raPEWP8LHZ9RDHQ6kRETwdLaO3IOSmLgvIq-0Vri36lGRKi7TA/exec";
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwESnxnJqIkgKIkEOc2UMr4uG9esO7l2wiGQ8q6uGNMLGYE6HAATTyRaXenGs5ok0HJSw/exec";
 
     let map, userMarker;
     let currentCoords = { lat: 0, lng: 0 };
     let isAdminLoggedIn = false;
     let html5QrCode = null;
+    let globalAdminData = []; 
+    let filteredAdminData = [];
+
+    // KAMUS TERJEMAHAN NAMA SHEET
+    function translateSheetName(rawName) {
+        if (!rawName) return "-";
+        if (rawName.toLowerCase() === "baris 1") return "info perangkat";
+        return rawName;
+    }
 
     window.addEventListener('load', () => {
         initGPSMap();
@@ -457,36 +521,152 @@
     }
 
     function loadAdminData() {
+        document.getElementById('searchResultCount').innerText = "Memuat data...";
         fetch(GAS_WEB_APP_URL, {
             method: 'POST',
             body: JSON.stringify({ action: "getRekap" })
         })
         .then(res => res.json())
-        .then(res => renderAdminTable(res.data));
+        .then(res => {
+            globalAdminData = res.data || [];
+            filterAdminData();
+        });
+    }
+
+    // FUNGSI PENCARIAN & FILTER MULTI-CRITERIA (SHEET + FIELD + KEYWORD)
+    function filterAdminData() {
+        const selectedSheet = document.getElementById('filterSheet').value;
+        const selectedField = document.getElementById('filterField').value;
+        const query = document.getElementById('adminSearchInput').value.toLowerCase().trim();
+
+        filteredAdminData = globalAdminData.filter(item => {
+            // 1. Filter Asal Sheet
+            if (selectedSheet !== "ALL" && item.sheetAsal !== selectedSheet) {
+                return false;
+            }
+
+            // 2. Filter Berdasarkan Kata Kunci
+            if (!query) return true;
+
+            if (selectedField === "odp") {
+                return (item.odp || "").toLowerCase().includes(query);
+            } else if (selectedField === "cidLama") {
+                return (item.cidLama || "").toLowerCase().includes(query);
+            } else if (selectedField === "namaLama") {
+                return (item.namaLama || "").toLowerCase().includes(query);
+            } else if (selectedField === "pop") {
+                return (item.pop || "").toLowerCase().includes(query);
+            } else {
+                // ALL fields
+                return (item.cidLama || "").toLowerCase().includes(query) || 
+                       (item.namaLama || "").toLowerCase().includes(query) || 
+                       (item.odp || "").toLowerCase().includes(query) || 
+                       (item.pop || "").toLowerCase().includes(query) || 
+                       (item.snUnit || "").toLowerCase().includes(query);
+            }
+        });
+
+        renderAdminTable(filteredAdminData);
     }
 
     function renderAdminTable(data) {
         const tbody = document.getElementById('tableBodyAdmin');
+        document.getElementById('searchResultCount').innerText = `Total Hasil: ${data.length} Data`;
+        document.getElementById('selectAllCheckbox').checked = false;
+        updateSelectedCount();
+
         if(!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-gray-400">Belum ada data.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="py-4 text-center text-gray-400">Data tidak ditemukan.</td></tr>';
             return;
         }
-        tbody.innerHTML = data.map(item => `
+
+        tbody.innerHTML = data.map((item, index) => `
             <tr class="border-b hover:bg-gray-50">
-                <td class="py-2 px-3">${item.waktu || '-'}</td>
-                <td class="py-2 px-3 font-bold">${item.odp}</td>
-                <td class="py-2 px-3">${item.pop}</td>
-                <td class="py-2 px-3">${item.cidLama} / ${item.namaLama}</td>
-                <td class="py-2 px-3 font-mono">${item.snUnit}</td>
                 <td class="py-2 px-3 text-center">
-                    <a href="${item.urlFotoRumah}" target="_blank" class="text-indigo-600 underline font-bold">Rumah</a> | 
-                    <a href="${item.urlFotoAlat}" target="_blank" class="text-indigo-600 underline font-bold">Perangkat</a>
+                    <input type="checkbox" class="row-checkbox rounded cursor-pointer" value="${index}" onchange="updateSelectedCount()">
+                </td>
+                <td class="py-2 px-3 font-semibold text-gray-500">
+                    <span class="bg-slate-100 text-slate-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase border border-slate-200">
+                        ${translateSheetName(item.sheetAsal)}
+                    </span>
+                </td>
+                <td class="py-2 px-3">${item.waktu || '-'}</td>
+                <td class="py-2 px-3 font-bold text-indigo-600">${item.odp || '-'}</td>
+                <td class="py-2 px-3">${item.pop || '-'}</td>
+                <td class="py-2 px-3">${item.cidLama || '-'} / ${item.namaLama || '-'}</td>
+                <td class="py-2 px-3 font-mono">${item.snUnit || '-'}</td>
+                <td class="py-2 px-3 text-center">
+                    ${item.urlFotoRumah ? `<a href="${item.urlFotoRumah}" target="_blank" class="text-indigo-600 underline font-bold">Rumah</a>` : '-'} | 
+                    ${item.urlFotoAlat ? `<a href="${item.urlFotoAlat}" target="_blank" class="text-indigo-600 underline font-bold">Alat</a>` : '-'}
                 </td>
                 <td class="py-2 px-3 text-center">
-                    <a href="https://maps.google.com/?q=${item.koordinat}" target="_blank" class="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-bold">Map</a>
+                    <button onclick="sendSingleWA(${index})" 
+                        class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 mx-auto">
+                        <i class="fab fa-whatsapp"></i> WA
+                    </button>
                 </td>
             </tr>
         `).join('');
+    }
+
+    function toggleSelectAll(master) {
+        const checkboxes = document.querySelectorAll('.row-checkbox');
+        checkboxes.forEach(cb => cb.checked = master.checked);
+        updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+        const selected = document.querySelectorAll('.row-checkbox:checked');
+        document.getElementById('selectedCount').innerText = selected.length;
+    }
+
+    // FORMAT PESAN WA TERMASUK INFORMASI SUMBER SHEET
+    function buildWAMessage(item) {
+        let text = `*📌 LAPORAN DATA LAPANGAN*\n`;
+        text += `*Sumber Data:* Sheet (${translateSheetName(item.sheetAsal)})\n`;
+        text += `------------------------------------\n`;
+        text += `*Waktu:* ${item.waktu}\n`;
+        text += `*ODP:* ${item.odp}\n`;
+        text += `*POP:* ${item.pop}\n`;
+        text += `*CID Lama:* ${item.cidLama}\n`;
+        text += `*Nama Lama:* ${item.namaLama}\n`;
+        text += `*SN Unit:* ${item.snUnit}\n`;
+        if(item.koordinat) text += `*Koordinat:* ${item.koordinat}\n`;
+        if(item.keterangan) text += `*Ket:* ${item.keterangan}\n`;
+        text += `------------------------------------\n`;
+        if(item.koordinat) text += `📍 *Maps:* https://maps.google.com/?q=${item.koordinat}\n`;
+        if(item.urlFotoRumah) text += `🖼️ *Foto Rumah:* ${item.urlFotoRumah}\n`;
+        if(item.urlFotoAlat) text += `🖼️ *Foto Perangkat:* ${item.urlFotoAlat}`;
+        
+        return encodeURIComponent(text);
+    }
+
+    function sendSingleWA(index) {
+        const item = filteredAdminData[index];
+        if(!item) return;
+
+        const encodedMessage = buildWAMessage(item);
+        window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
+    }
+
+    function sendSelectedToWA() {
+        const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        if(selectedBoxes.length === 0) {
+            return showToast("Pilih minimal 1 data untuk dikirim!");
+        }
+
+        let delay = 0;
+        selectedBoxes.forEach(box => {
+            const index = parseInt(box.value);
+            const item = filteredAdminData[index];
+            if(item) {
+                setTimeout(() => {
+                    const encodedMessage = buildWAMessage(item);
+                    window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
+                }, delay);
+                delay += 1000;
+            }
+        });
     }
 
     function showToast(msg) {
