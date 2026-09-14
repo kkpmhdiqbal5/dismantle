@@ -696,4 +696,97 @@
         t.style.bottom = '20px';
         setTimeout(() => t.style.bottom = '-100px', 3000);
     }
+
+    // Variable global untuk menyimpan data pencarian/rekap
+let dataTerpilih = [];
+
+// Function 1: Mengambil data centang dari tabel
+function getCheckedRows() {
+  const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+  const selectedData = [];
+  
+  checkboxes.forEach(cb => {
+    // Mengambil objek data yang tersimpan di baris tabel
+    const index = cb.getAttribute('data-index');
+    if (window.currentRekapData && window.currentRekapData[index]) {
+      selectedData.push(window.currentRekapData[index]);
+    }
+  });
+
+  return selectedData;
+}
+
+// Function 2: Kirim Sekaligus (1 Data = 1 Pesan) dengan Jeda/Delay
+async function kirimTerpisahSekaligus() {
+  const selectedData = getCheckedRows();
+  
+  if (selectedData.length === 0) {
+    alert("Pilih minimal satu data yang ingin dikirim!");
+    return;
+  }
+
+  const noHpTujuan = prompt("Masukkan Nomor WA Tujuan (Contoh: 628123456789):");
+  if (!noHpTujuan) return;
+
+  const confirmSend = confirm(`Akan mengirim ${selectedData.length} pesan terpisah. Lanjutkan?`);
+  if (!confirmSend) return;
+
+  for (let i = 0; i < selectedData.length; i++) {
+    const item = selectedData[i];
+    
+    // Format teks pesan per item
+    let pesan = `*DETAIL DATA* (${i + 1}/${selectedData.length})\n`;
+    pesan += `Nama: ${item.namaLama || '-'}\n`;
+    pesan += `CID: ${item.cidLama || '-'}\n`;
+    pesan += `ODP: ${item.odp || '-'}\n`;
+    pesan += `POP: ${item.pop || '-'}\n`;
+    pesan += `SN Unit: ${item.snUnit || '-'}\n`;
+    pesan += `Sheet: ${item.sheetAsal || '-'}\n`;
+
+    const encodedText = encodeURIComponent(pesan);
+    const waUrl = `https://api.whatsapp.com/send?phone=${noHpTujuan}&text=${encodedText}`;
+    
+    // Buka tab baru untuk setiap pesan
+    window.open(waUrl, '_blank');
+
+    // JEDA 2 DETIK agar browser & WA Web tidak memblokir pop-up beruntun
+    if (i < selectedData.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  }
+}
+
+// Function 3: FITUR BARU - Kirim Pesan Gabungan (All in 1 Message)
+function kirimPesanGabungan() {
+  const selectedData = getCheckedRows();
+  
+  if (selectedData.length === 0) {
+    alert("Pilih minimal satu data untuk digabungkan!");
+    return;
+  }
+
+  const noHpTujuan = prompt("Masukkan Nomor WA Tujuan (Contoh: 628123456789):");
+  if (!noHpTujuan) return;
+
+  // Menyusun header pesan gabungan
+  let pesanGabungan = `*REKAP DATA TERPILIH (${selectedData.length} ITEM)*\n`;
+  pesanGabungan += `==========================\n\n`;
+
+  // Melakukan looping gabungkan seluruh item ke dalam 1 string
+  selectedData.forEach((item, index) => {
+    pesanGabungan += `*${index + 1}. ${item.namaLama || 'No Name'}*\n`;
+    pesanGabungan += `• CID: ${item.cidLama || '-'}\n`;
+    pesanGabungan += `• ODP: ${item.odp || '-'}\n`;
+    pesanGabungan += `• POP: ${item.pop || '-'}\n`;
+    pesanGabungan += `• SN: ${item.snUnit || '-'}\n`;
+    pesanGabungan += `• Sheet: ${item.sheetAsal || '-'}\n`;
+    pesanGabungan += `--------------------------\n`;
+  });
+
+  // Kirim 1 pesan ringkasan penuh
+  const encodedText = encodeURIComponent(pesanGabungan);
+  const waUrl = `https://api.whatsapp.com/send?phone=${noHpTujuan}&text=${encodedText}`;
+  
+  window.open(waUrl, '_blank');
+}
 </script>
