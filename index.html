@@ -736,7 +736,7 @@ function sendGroupToWA() {
             
             // SHERLOCK & FOTO DI PESAN GABUNGAN
             if(item.koordinat) {
-                groupText += `📍 Sherlock: {encodeURIComponent}\n`;
+                groupText += `📍 Sherlock: (item.koordinat)\n`;
             }
             if(item.urlFotoRumah) {
                 groupText += `🖼️ Foto Rumah: ${item.urlFotoRumah}\n`;
