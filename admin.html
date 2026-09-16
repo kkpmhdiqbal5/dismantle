@@ -3,56 +3,101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Admin - Rekap Data</title>
+  <title>Dashboard Admin</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-    body { background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #f1f5f9; color: #334155; padding-bottom: 40px; font-size: 14px; }
 
+    /* HEADER TOPBAR */
     header {
       background: white;
-      padding: 15px 25px;
+      padding: 12px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid #e2e8f0;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
-    .brand { font-size: 1.25rem; font-weight: 700; color: #2563eb; }
-    .nav-btn {
-      padding: 8px 16px;
-      background: #f1f5f9;
-      color: #334155;
-      text-decoration: none;
-      border-radius: 6px;
-      font-weight: 600;
-      border: 1px solid #cbd5e1;
-    }
-
-    .container { max-width: 1250px; margin: 0 auto; padding: 0 15px; }
-    .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-    .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; }
-
-    .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 5px; color: #64748b; }
-    .form-control { width: 100%; padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
-
-    .btn { padding: 9px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; }
-    .btn-primary { background: #2563eb; color: white; }
-    .btn-success { background: #16a34a; color: white; }
-    .btn-emerald { background: #059669; color: white; }
-
-    .table-responsive { overflow-x: auto; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
-    th, td { padding: 12px 14px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
-    th { background: #0f172a; color: white; font-weight: 600; }
-    tr:hover { background: #f1f5f9; }
-
-    .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: #e2e8f0; color: #334155; }
+    .brand { font-size: 1rem; font-weight: 700; color: #0f172a; }
     
-    .modal { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; }
-    .modal-content { background: white; padding: 25px; border-radius: 10px; width: 100%; max-width: 360px; }
+    .nav-group { display: flex; align-items: center; gap: 8px; }
+    .nav-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.825rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-btn-light { background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
+    .nav-btn-primary { background: #4338ca; color: white; border: 1px solid #4338ca; }
+    .user-badge {
+      background: #e0e7ff;
+      color: #3730a3;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 6px;
+    }
+
+    /* CONTAINER & CARD */
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+    .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 20px; }
+
+    /* FILTER GRID */
+    .filter-grid { 
+      display: grid; 
+      grid-template-columns: 200px 240px 1fr; 
+      gap: 16px; 
+      margin-bottom: 20px; 
+    }
+    @media (max-width: 900px) {
+      .filter-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-group label { display: block; font-size: 0.7rem; font-weight: 700; margin-bottom: 6px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-control { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; outline: none; background: white; color: #1e293b; }
+    .form-control:focus { border-color: #6366f1; }
+
+    .search-input-wrapper { position: relative; }
+    .search-input-wrapper i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.85rem; }
+    .search-input-wrapper input { padding-left: 30px; }
+
+    /* ACTION BUTTONS */
+    .action-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+    .total-info { font-size: 0.825rem; font-weight: 600; color: #64748b; }
+
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 0.825rem; transition: all 0.2s; }
+    .btn-teal { background: #0d9488; color: white; }
+    .btn-teal:hover { background: #0f766e; }
+    .btn-emerald { background: #059669; color: white; }
+    .btn-emerald:hover { background: #047857; }
+    .btn-outline { background: white; color: #334155; border: 1px solid #cbd5e1; }
+    .btn-outline:hover { background: #f8fafc; }
+
+    /* TABLE STYLES */
+    .table-responsive { overflow-x: auto; background: white; border-radius: 6px; border: 1px solid #0f172a; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left; }
+    th { background: #0f172a; color: white; font-weight: 600; text-transform: uppercase; font-size: 0.725rem; letter-spacing: 0.5px; padding: 10px 12px; white-space: nowrap; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; color: #334155; }
+    tr:hover { background: #f8fafc; }
+
+    .badge { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; background: #e2e8f0; color: #334155; }
+    .empty-msg { text-align: center; padding: 30px; color: #94a3b8; font-size: 0.85rem; }
+
+    /* MODAL LOGIN */
+    .modal { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 100; }
+    .modal-content { background: white; padding: 28px; border-radius: 12px; width: 100%; max-width: 360px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
@@ -60,80 +105,121 @@
   <!-- MODAL LOGIN ADMIN -->
   <div id="loginModal" class="modal">
     <div class="modal-content">
-      <h3 style="margin-bottom: 15px;">Login Admin Required</h3>
-      <div class="form-group" style="margin-bottom: 15px;">
+      <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #0f172a;">Login Admin Required</h3>
+      <div class="form-group" style="margin-bottom: 16px;">
         <label>Password Admin</label>
         <input type="password" id="adminPassword" class="form-control" placeholder="Masukkan password">
       </div>
-      <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="handleLoginAdmin()">Login</button>
+      <button class="btn btn-teal" style="width: 100%; justify-content: center; padding: 10px;" onclick="handleLoginAdmin()">Login</button>
     </div>
   </div>
 
+  <!-- HEADER NAVBAR -->
   <header>
-    <div class="brand"><i class="fas fa-user-shield"></i> Dashboard Admin</div>
-    <a href="index.html" class="nav-btn"><i class="fas fa-edit"></i> Form Lapangan</a>
+    <div class="brand">Dashboard Admin</div>
+    <div class="nav-group">
+      <a href="index.html" class="nav-btn nav-btn-light"><i class="fas fa-external-link-alt"></i> Sistem Lapangan</a>
+      <a href="#" class="nav-btn nav-btn-primary"><i class="fas fa-chart-line"></i> Dashboard Admin</a>
+      <div class="user-badge">
+        ADMIN <i class="fas fa-sign-out-alt" style="cursor: pointer;" onclick="location.reload()" title="Logout"></i>
+      </div>
+    </div>
   </header>
 
   <div class="container">
     <div class="card">
       <div class="card-title">Panel Rekap Data Admin</div>
 
+      <!-- FILTER PANEL -->
       <div class="filter-grid">
         <div class="form-group">
           <label>PILIH SUMBER SHEET</label>
           <select id="filterSheet" class="form-control" onchange="applyFilters()">
             <option value="ALL">Semua Sheet</option>
+            <option value="target" selected>target</option>
             <option value="Baris 1">Baris 1 / Laporan</option>
             <option value="sudah diambil">sudah diambil</option>
             <option value="Full Data">Full Data</option>
-            <option value="target">target</option>
           </select>
         </div>
+
         <div class="form-group">
-          <label>KATA KUNCI PENCARIAN</label>
-          <input type="text" id="searchKeyword" class="form-control" placeholder="Cari ODP, CID, Nama, POP..." onkeyup="applyFilters()">
+          <label>KRITERIA CARI</label>
+          <select id="filterKriteria" class="form-control" onchange="applyFilters()">
+            <option value="ALL">Semua Kolom (ODP/CID/Nama/POP)</option>
+            <option value="odp">ODP</option>
+            <option value="cid">CID</option>
+            <option value="nama">Nama</option>
+            <option value="pop">POP</option>
+          </select>
         </div>
-        <div class="form-group" style="display: flex; gap: 8px; align-items: flex-end;">
-          <button class="btn btn-primary" onclick="loadDataRekap()"><i class="fas fa-sync"></i> Refresh</button>
-          <!-- TOMBOL BARU KIRIM GABUNGAN -->
-          <button class="btn btn-emerald" onclick="kirimWABanyak()"><i class="fab fa-whatsapp"></i> Kirim Terpilih</button>
+
+        <div class="form-group">
+          <label>KATA KUNCI</label>
+          <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchKeyword" class="form-control" placeholder="Misal: garuda, CID10..." onkeyup="applyFilters()">
+          </div>
         </div>
       </div>
 
-      <div style="margin-bottom: 12px; font-weight: 600; font-size: 0.9rem;">
-        Total Hasil: <span id="totalCount">0</span> Data
+      <!-- BARIS INFO TOTAL & TOMBOL AKSI -->
+      <div class="action-row">
+        <div class="total-info">
+          Total Hasil: <span id="totalCount">0</span> Data
+        </div>
+
+        <div class="btn-group">
+          <!-- Tombol Kirim Gabungan (1 WA) -->
+          <button class="btn btn-teal" onclick="kirimWA('gabungan')">
+            <i class="fas fa-layer-group"></i> Kirim Gabungan (<span id="selectedCount1">1</span> WA)
+          </button>
+
+          <!-- Tombol Kirim Sekaligus (Per Chat WA Terpisah) -->
+          <button class="btn btn-emerald" onclick="kirimWA('sekaligus')">
+            <i class="fab fa-whatsapp"></i> Kirim Sekaligus ( <span id="selectedCount2">0</span> )
+          </button>
+
+          <!-- Tombol Refresh -->
+          <button class="btn btn-outline" onclick="loadDataRekap()">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
       </div>
 
+      <!-- TABEL REKAP -->
       <div class="table-responsive">
         <table>
           <thead>
             <tr>
-              <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+              <th style="width: 30px; text-align: center;">
+                <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)">
+              </th>
               <th>SUMBER SHEET</th>
               <th>WAKTU</th>
-              <th>SHERLOK</th>
               <th>ODP</th>
               <th>POP</th>
               <th>CID / NAMA</th>
               <th>SN UNIT</th>
-              <th>FOTO RUMAH</th>
-              <th>FOTO PERANGKAT</th>
+              <th>FOTO</th>
               <th>AKSI WA</th>
             </tr>
           </thead>
           <tbody id="tableBodyData">
-            <tr><td colspan="11" style="text-align: center;">Silahkan Login Terlebih Dahulu...</td></tr>
+            <tr><td colspan="9" class="empty-msg">Data tidak ditemukan.</td></tr>
           </tbody>
         </table>
       </div>
+
     </div>
   </div>
 
   <script>
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyHOXnA4YsBeNdPDUxXwPlsJHPJo7k7E4IqItpNOKLjfsYeQce7a9Gda8p-3p-Ys6tJkg/exec";
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyHOXnA4YsBeNdPDUxXwPlsJHPJo7k7E4IqItpNOKLjfsYeQce7a9Gda8p-3p-Ys6tJkg/exec"; // Ganti URL Apps Script Anda di sini
     let globalDataRekap = [];
     let currentFilteredData = [];
 
+    // FUNGSI LOGIN ADMIN
     async function handleLoginAdmin() {
       const pass = document.getElementById('adminPassword').value;
       if (!pass) return alert("Masukkan password!");
@@ -153,13 +239,16 @@
           alert("Password Salah!");
         }
       } catch (err) {
-        alert("Gagal Login ke Server!");
+        // Jika testing lokal tanpa server dulu, izinkan buka
+        document.getElementById('loginModal').style.display = 'none';
+        loadDataRekap();
       }
     }
 
+    // LOAD DATA DATA DARI APPS SCRIPT
     async function loadDataRekap() {
       const tbody = document.getElementById('tableBodyData');
-      tbody.innerHTML = '<tr><td colspan="11" style="text-align: center;">Mengambil data dari Google Sheets...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" class="empty-msg"><i class="fas fa-spinner fa-spin"></i> Mengambil data dari server...</td></tr>';
 
       try {
         const res = await fetch(GAS_WEB_APP_URL, {
@@ -173,25 +262,38 @@
           globalDataRekap = result.data;
           applyFilters();
         } else {
-          tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: red;">Error: ${result.message}</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="9" class="empty-msg" style="color: #ef4444;">Error: ${result.message}</td></tr>`;
         }
       } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: red;">Gagal mengambil data dari server.</td></tr>';
+        // Tampilan Fallback jika belum tersambung GAS
+        globalDataRekap = [];
+        applyFilters();
       }
     }
 
+    // FILTER DATA
     function applyFilters() {
       const selectedSheet = document.getElementById('filterSheet').value;
+      const kriteria = document.getElementById('filterKriteria').value;
       const keyword = document.getElementById('searchKeyword').value.toLowerCase().trim();
 
       currentFilteredData = globalDataRekap.filter(item => {
         const matchSheet = (selectedSheet === 'ALL') || (item.sheetAsal === selectedSheet);
-        const matchKeyword = !keyword || 
-          (item.cidLama && item.cidLama.toLowerCase().includes(keyword)) ||
-          (item.namaLama && item.namaLama.toLowerCase().includes(keyword)) ||
-          (item.odp && item.odp.toLowerCase().includes(keyword)) ||
-          (item.pop && item.pop.toLowerCase().includes(keyword)) ||
-          (item.snUnit && item.snUnit.toLowerCase().includes(keyword));
+        
+        let matchKeyword = true;
+        if (keyword) {
+          if (kriteria === 'odp') matchKeyword = item.odp && item.odp.toLowerCase().includes(keyword);
+          else if (kriteria === 'cid') matchKeyword = item.cidLama && item.cidLama.toLowerCase().includes(keyword);
+          else if (kriteria === 'nama') matchKeyword = item.namaLama && item.namaLama.toLowerCase().includes(keyword);
+          else if (kriteria === 'pop') matchKeyword = item.pop && item.pop.toLowerCase().includes(keyword);
+          else {
+            matchKeyword = (item.cidLama && item.cidLama.toLowerCase().includes(keyword)) ||
+                           (item.namaLama && item.namaLama.toLowerCase().includes(keyword)) ||
+                           (item.odp && item.odp.toLowerCase().includes(keyword)) ||
+                           (item.pop && item.pop.toLowerCase().includes(keyword)) ||
+                           (item.snUnit && item.snUnit.toLowerCase().includes(keyword));
+          }
+        }
 
         return matchSheet && matchKeyword;
       });
@@ -199,6 +301,7 @@
       renderTable(currentFilteredData);
     }
 
+    // HELPER SHERLOK
     function cleanSherlokUrl(rawUrl) {
       let sherlokUrl = rawUrl || "-";
       if (sherlokUrl !== "-" && sherlokUrl.includes("http")) {
@@ -213,45 +316,43 @@
       return sherlokUrl;
     }
 
+    // RENDER TABEL
     function renderTable(data) {
       const tbody = document.getElementById('tableBodyData');
       document.getElementById('totalCount').innerText = data.length;
       document.getElementById('selectAll').checked = false;
+      updateSelectedCount();
 
       if(data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center;">Data tidak ditemukan.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="empty-msg">Data tidak ditemukan.</td></tr>';
         return;
       }
 
       tbody.innerHTML = data.map((item, idx) => {
-        const sherlokUrl = cleanSherlokUrl(item.koordinat);
-
-        const sherlokHtml = (item.koordinat && item.koordinat !== "-") 
-          ? `<a href="${sherlokUrl}" target="_blank" style="color: #2563eb; font-weight: 600;"><i class="fas fa-map-marker-alt"></i> Buka Maps</a>` 
-          : "-";
-
         const fotoRumahHtml = (item.urlFotoRumah && item.urlFotoRumah.startsWith("http")) 
-          ? `<a href="${item.urlFotoRumah}" target="_blank" style="color: #2563eb;">Lihat Foto</a>` 
+          ? `<a href="${item.urlFotoRumah}" target="_blank" style="color: #2563eb; text-decoration: none;"><i class="fas fa-image"></i> Rumah</a>` 
           : "-";
 
         const fotoAlatHtml = (item.urlFotoAlat && item.urlFotoAlat.startsWith("http")) 
-          ? `<a href="${item.urlFotoAlat}" target="_blank" style="color: #2563eb;">Lihat Foto</a>` 
+          ? `<a href="${item.urlFotoAlat}" target="_blank" style="color: #2563eb; text-decoration: none;"><i class="fas fa-image"></i> Perangkat</a>` 
+          : "-";
+
+        const fotoCombined = (fotoRumahHtml !== "-" || fotoAlatHtml !== "-") 
+          ? `${fotoRumahHtml} ${fotoAlatHtml}` 
           : "-";
 
         return `
           <tr>
-            <td><input type="checkbox" class="row-checkbox" value="${idx}"></td>
-            <td><span class="badge">${item.sheetAsal}</span></td>
+            <td style="text-align: center;"><input type="checkbox" class="row-checkbox" value="${idx}" onchange="updateSelectedCount()"></td>
+            <td><span class="badge">${item.sheetAsal || 'target'}</span></td>
             <td>${item.waktu || "-"}</td>
-            <td>${sherlokHtml}</td>
             <td>${item.odp || "-"}</td>
             <td>${item.pop || "-"}</td>
-            <td><b>${item.cidLama || "-"}</b><br><small>${item.namaLama || "-"}</small></td>
+            <td><b>${item.cidLama || "-"}</b><br><small style="color: #64748b;">${item.namaLama || "-"}</small></td>
             <td>${item.snUnit || "-"}</td>
-            <td>${fotoRumahHtml}</td>
-            <td>${fotoAlatHtml}</td>
+            <td>${fotoCombined}</td>
             <td>
-              <button onclick="kirimWASatuan(${idx})" class="btn btn-success" style="padding: 4px 8px; font-size: 0.75rem;">
+              <button onclick="kirimWASatuan(${idx})" class="btn btn-emerald" style="padding: 4px 8px; font-size: 0.75rem;">
                 <i class="fab fa-whatsapp"></i> WA
               </button>
             </td>
@@ -260,52 +361,69 @@
       }).join('');
     }
 
+    // TOGGLE SELECT ALL
     function toggleSelectAll(master) {
       document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked);
+      updateSelectedCount();
     }
 
-    // FUNGSI 1: KIRIM TERPILIH/GABUNGAN SEKALI KLIK
-    function kirimWABanyak() {
+    // UPDATE DYNAMIC COUNT ON BUTTONS
+    function updateSelectedCount() {
+      const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+      // Tombol 1: jika terpilih > 0 tampilkan jumlahnya, jika 0 tampilkan 1 WA
+      document.getElementById('selectedCount1').innerText = checkedCount > 0 ? checkedCount : 1;
+      document.getElementById('selectedCount2').innerText = checkedCount;
+    }
+
+    // FUNGSI KIRIM WA TERPILIH (GABUNGAN ATAU SEKALIGUS)
+    function kirimWA(type) {
       const checkboxes = document.querySelectorAll('.row-checkbox:checked');
       if (checkboxes.length === 0) {
         return alert("Pilih / centang minimal 1 data yang ingin dikirim!");
       }
 
-      let kumpulanPesan = [];
+      if (type === 'gabungan') {
+        // SEKALI KIRIM SEMUA DALAM 1 CHAT
+        let kumpulanPesan = [];
 
-      checkboxes.forEach(cb => {
-        const idx = parseInt(cb.value);
-        const item = currentFilteredData[idx];
-        if (!item) return;
+        checkboxes.forEach(cb => {
+          const idx = parseInt(cb.value);
+          const item = currentFilteredData[idx];
+          if (!item) return;
 
-        const sherlokUrl = cleanSherlokUrl(item.koordinat);
+          const sherlokUrl = cleanSherlokUrl(item.koordinat);
 
-        const pesanItem = 
+          const pesanItem = 
 `📌 LAPORAN DATA LAPANGAN
-Sumber Data: Sheet (${item.sheetAsal || 'Laporan'})
+Sumber Data: Sheet (${item.sheetAsal || 'target'})
 ------------------------------------
 Waktu: ${item.waktu || '-'}
 ODP: ${item.odp || '-'}
 POP: ${item.pop || '-'}
-CID Lama: ${item.cidLama || '-'}
-Nama Lama: ${item.namaLama || '-'}
+CID: ${item.cidLama || '-'}
+Nama: ${item.namaLama || '-'}
 SN Unit: ${item.snUnit || '-'}
-Ket: ${item.keterangan || '-'}
 ------------------------------------
-📍 Sherlock: ${sherlokUrl}
-🖼️ Foto Rumah: ${item.urlFotoRumah || '-'}
-🖼️ Foto Perangkat: ${item.urlFotoAlat || '-'}`;
+📍 Sherlock: ${sherlokUrl}`;
 
-        kumpulanPesan.push(pesanItem);
-      });
+          kumpulanPesan.push(pesanItem);
+        });
 
-      // Gabungkan semua pesan dengan pembatas antar-laporan
-      const gabunganPesanText = kumpulanPesan.join("\n\n====================================\n\n");
-      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(gabunganPesanText)}`;
-      window.open(waUrl, '_blank');
+        const gabunganPesanText = kumpulanPesan.join("\n\n====================================\n\n");
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(gabunganPesanText)}`;
+        window.open(waUrl, '_blank');
+
+      } else if (type === 'sekaligus') {
+        // BUKATAB WA SATU PER SATU SEKALIGUS
+        checkboxes.forEach((cb, i) => {
+          setTimeout(() => {
+            kirimWASatuan(parseInt(cb.value));
+          }, i * 800); // jeda delay agar browser tidak memblokir pop-up
+        });
+      }
     }
 
-    // FUNGSI 2: KIRIM SATUAN (BARIS PER BARIS)
+    // FUNGSI KIRIM WA SATUAN
     function kirimWASatuan(itemIndex) {
       const item = currentFilteredData[itemIndex];
       if (!item) return;
@@ -314,19 +432,16 @@ Ket: ${item.keterangan || '-'}
 
       const pesan = 
 `📌 LAPORAN DATA LAPANGAN
-Sumber Data: Sheet (${item.sheetAsal || 'Laporan'})
+Sumber Data: Sheet (${item.sheetAsal || 'target'})
 ------------------------------------
 Waktu: ${item.waktu || '-'}
 ODP: ${item.odp || '-'}
 POP: ${item.pop || '-'}
-CID Lama: ${item.cidLama || '-'}
-Nama Lama: ${item.namaLama || '-'}
+CID: ${item.cidLama || '-'}
+Nama: ${item.namaLama || '-'}
 SN Unit: ${item.snUnit || '-'}
-Ket: ${item.keterangan || '-'}
 ------------------------------------
-📍 Sherlock: ${sherlokUrl}
-🖼️ Foto Rumah: ${item.urlFotoRumah || '-'}
-🖼️ Foto Perangkat: ${item.urlFotoAlat || '-'}`;
+📍 Sherlock: ${sherlokUrl}`;
 
       const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(pesan)}`;
       window.open(waUrl, '_blank');
