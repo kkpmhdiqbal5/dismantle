@@ -3,255 +3,461 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Lapangan - Dismantle</title>
-  
-  <!-- CSS & Leaflet (Peta) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  
+  <title>Sistem Client & Dashboard Admin</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-    body { background-color: #f1f5f9; color: #1e293b; padding-bottom: 30px; }
+    :root {
+      --primary-color: #2563eb;
+      --secondary-color: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #e2e8f0;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 40px; }
+
+    /* Navigasi Header */
     header {
-      background: #ffffff;
-      padding: 15px 20px;
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .brand { font-size: 1.2rem; font-weight: 700; color: #0f172a; }
+
+    .nav-tabs { display: flex; gap: 10px; }
     .nav-btn {
       padding: 8px 16px;
-      background: #2563eb;
-      color: white;
-      text-decoration: none;
+      border: 1px solid var(--border-color);
+      background: white;
       border-radius: 6px;
+      cursor: pointer;
       font-weight: 600;
-      font-size: 0.875rem;
+      color: var(--text-color);
     }
+    .nav-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
 
-    .container { max-width: 650px; margin: 0 auto; padding: 0 15px; }
-    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-    .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; text-align: center; color: #2563eb; }
+    /* Main Container */
+    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-    #map-container {
-      height: 200px;
-      width: 100%;
+    /* Card Box */
+    .card {
+      background: var(--card-bg);
       border-radius: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #cbd5e1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 24px;
+      margin-bottom: 20px;
     }
+    .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; color: #0f172a; }
 
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #475569; }
+    /* Form Inputs */
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
     .form-control {
       width: 100%;
       padding: 10px;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border-color);
       border-radius: 6px;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
     }
-    .form-control:focus { outline: none; border-color: #2563eb; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .btn-submit {
-      width: 100%;
-      padding: 12px;
-      background: #2563eb;
-      color: white;
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
       border: none;
       border-radius: 6px;
-      font-weight: 700;
-      font-size: 1rem;
       cursor: pointer;
-      margin-top: 10px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
-    .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-primary { background: var(--primary-color); color: white; }
+    .btn-primary:hover { background: var(--secondary-color); }
+    .btn-success { background: #16a34a; color: white; }
+
+    /* Admin Search Controls */
+    .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+
+    /* Table Styling */
+    .table-responsive { overflow-x: auto; background: white; border-radius: 8px; border: 1px solid var(--border-color); }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
+    th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+    th { background: #f1f5f9; font-weight: 700; color: #475569; }
+    tr:hover { background: #f8fafc; }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #e2e8f0;
+    }
+
+    /* Modal Login */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content { background: white; padding: 30px; border-radius: 8px; width: 100%; max-width: 400px; }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="brand"><i class="fas fa-tools"></i> Sistem Lapangan</div>
-    <a href="admin.html" class="nav-btn"><i class="fas fa-user-shield"></i> Dashboard Admin</a>
+    <h2>System Client</h2>
+    <div class="nav-tabs">
+      <button class="nav-btn active" onclick="switchTab('lapanganTab')"><i class="fas fa-edit"></i> Sistem Lapangan</button>
+      <button class="nav-btn" onclick="openAdminModal()"><i class="fas fa-user-shield"></i> Dashboard Admin</button>
+    </div>
   </header>
 
   <div class="container">
-    <div class="card">
-      <div class="card-title">Form Input Dismantle / Lapangan</div>
-      
-      <!-- PETA SATELLITE OTOMATIS -->
-      <div id="map-container"></div>
 
-      <form id="formLapangan" onsubmit="handleSimpanData(event)">
-        <div class="form-group">
-          <label>Koordinat (GPS / Link Sherlok)</label>
-          <input type="text" id="inpKoordinat" class="form-control" placeholder="Mendeteksi GPS..." required readonly style="background:#f8fafc;">
-        </div>
+    <!-- 1. TAB SISTEM LAPANGAN -->
+    <div id="lapanganTab" class="tab-content active">
+      <div class="card">
+        <h3 class="card-title">Form Input Dismantle / Lapangan</h3>
+        <form id="formLapangan" onsubmit="handleSimpanData(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Koordinat (GPS)</label>
+              <input type="text" id="koordinat" class="form-control" placeholder="Contoh: 3.5351, 98.5622" required>
+            </div>
+            <div class="form-group">
+              <label>ODP</label>
+              <input type="text" id="odp" class="form-control" placeholder="Input Kode ODP" required>
+            </div>
+            <div class="form-group">
+              <label>POP</label>
+              <input type="text" id="pop" class="form-control" placeholder="Input Nama POP" required>
+            </div>
+            <div class="form-group">
+              <label>CID Lama</label>
+              <input type="text" id="cidLama" class="form-control" placeholder="Input CID Lama" required>
+            </div>
+            <div class="form-group">
+              <label>Nama Lama / Pelanggan</label>
+              <input type="text" id="namaLama" class="form-control" placeholder="Nama Pelanggan" required>
+            </div>
+            <div class="form-group">
+              <label>SN Unit / Perangkat</label>
+              <input type="text" id="snUnit" class="form-control" placeholder="Input Serial Number">
+            </div>
+          </div>
 
-        <div class="grid-2">
           <div class="form-group">
-            <label>ODP TERDAFTAR / BARU *</label>
-            <input type="text" id="inpOdp" class="form-control" placeholder="Input ODP" required>
+            <label>Keterangan</label>
+            <textarea id="keterangan" class="form-control" rows="2" placeholder="Catatan tambahan..."></textarea>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Foto Rumah</label>
+              <input type="file" id="fotoRumah" class="form-control" accept="image/*" required>
+            </div>
+            <div class="form-group">
+              <label>Foto Perangkat / Alat</label>
+              <input type="file" id="fotoAlat" class="form-control" accept="image/*" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btnSubmit"><i class="fas fa-paper-plane"></i> Simpan Data</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. TAB DASHBOARD ADMIN -->
+    <div id="adminTab" class="tab-content">
+      <div class="card">
+        <h3 class="card-title">Panel Rekap Data Admin</h3>
+        
+        <div class="filter-grid">
+          <div class="form-group">
+            <label>Pilih Sumber Sheet</label>
+            <select id="filterSheet" class="form-control" onchange="applyFilters()">
+              <option value="ALL">Semua Sheet</option>
+              <option value="Baris 1">Baris 1 / Laporan</option>
+              <option value="sudah diambil">sudah diambil</option>
+              <option value="Full Data">Full Data</option>
+              <option value="target">target</option>
+            </select>
           </div>
           <div class="form-group">
-            <label>POP *</label>
-            <input type="text" id="inpPop" class="form-control" placeholder="Input POP" required>
+            <label>Kata Kunci Pencarian</label>
+            <input type="text" id="searchKeyword" class="form-control" placeholder="Cari ODP, CID, Nama, POP..." onkeyup="applyFilters()">
+          </div>
+          <div class="form-group" style="display:flex; align-items:flex-end; gap: 10px;">
+            <button class="btn btn-primary" onclick="loadDataRekap()"><i class="fas fa-sync"></i> Refresh Data</button>
           </div>
         </div>
 
-        <div class="grid-2">
-          <div class="form-group">
-            <label>CID LAMA *</label>
-            <input type="text" id="inpCidLama" class="form-control" placeholder="Ex: CID10" required>
-          </div>
-          <div class="form-group">
-            <label>NAMA LAMA / PELANGGAN *</label>
-            <input type="text" id="inpNamaLama" class="form-control" placeholder="Nama Pelanggan" required>
-          </div>
+        <div style="margin-bottom: 15px; font-weight: 600;">
+          Total Hasil: <span id="totalDataCount">0</span> Data
         </div>
 
-        <div class="form-group">
-          <label>SERIAL NUMBER (SN) UNIT *</label>
-          <input type="text" id="inpSnUnit" class="form-control" placeholder="Ketik atau Scan SN" required>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                <th>SUMBER SHEET</th>
+                <th>WAKTU</th>
+                <th>SHERLOK</th>
+                <th>ODP</th>
+                <th>POP</th>
+                <th>CID / NAMA</th>
+                <th>SN UNIT</th>
+                <th>FOTO RUMAH</th>
+                <th>FOTO PERANGKAT</th>
+                <th>AKSI WA</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyData">
+              <tr><td colspan="11" style="text-align: center;">Memuat data...</td></tr>
+            </tbody>
+          </table>
         </div>
+      </div>
+    </div>
 
-        <div class="form-group">
-          <label>KETERANGAN (OPSIONAL)</label>
-          <textarea id="inpKeterangan" class="form-control" rows="2" placeholder="Catatan kendala lapangan..."></textarea>
-        </div>
+  </div>
 
-        <div class="grid-2">
-          <div class="form-group">
-            <label>FOTO RUMAH *</label>
-            <input type="file" id="inpFotoRumah" class="form-control" accept="image/*" required>
-          </div>
-          <div class="form-group">
-            <label>FOTO ALAT *</label>
-            <input type="file" id="inpFotoAlat" class="form-control" accept="image/*" required>
-          </div>
-        </div>
-
-        <button type="submit" id="btnSubmit" class="btn-submit">
-          <i class="fas fa-paper-plane"></i> Kirim Data Lapangan
-        </button>
-      </form>
+  <!-- MODAL LOGIN ADMIN -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 15px;">Login Admin Required</h3>
+      <div class="form-group">
+        <label>Password Admin</label>
+        <input type="password" id="adminPassword" class="form-control" placeholder="Masukkan password">
+      </div>
+      <div style="display:flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn" onclick="closeAdminModal()">Batal</button>
+        <button class="btn btn-primary" onclick="handleLoginAdmin()">Login</button>
+      </div>
     </div>
   </div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
+    // PASTE URL WEB APP BARU HASIL DEPLOY APPS SCRIPT DI SINI
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyHOXnA4YsBeNdPDUxXwPlsJHPJo7k7E4IqItpNOKLjfsYeQce7a9Gda8p-3p-Ys6tJkg/exec";
 
-    let map, marker;
+    let globalDataRekap = [];
+    let isAdminLoggedIn = false;
 
-    window.addEventListener('load', () => {
-      map = L.map('map-container').setView([-2.548926, 118.014863], 5);
+    // Tab Navigation
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
       
-      L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
-        maxZoom: 20,
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-      }).addTo(map);
-
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          const latLngStr = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-          
-          document.getElementById('inpKoordinat').value = latLngStr;
-          map.setView([lat, lng], 17);
-          
-          marker = L.marker([lat, lng]).addTo(map)
-            .bindPopup("Posisi Anda").openPopup();
-        }, err => {
-          document.getElementById('inpKoordinat').value = "GPS tidak diizinkan";
-          document.getElementById('inpKoordinat').removeAttribute("readonly");
-        }, { enableHighAccuracy: true });
+      document.getElementById(tabId).classList.add('active');
+      
+      if(tabId === 'lapanganTab') {
+        document.querySelectorAll('.nav-btn')[0].classList.add('active');
+      } else {
+        document.querySelectorAll('.nav-btn')[1].classList.add('active');
       }
-    });
+    }
 
-    function compressImage(file, maxWidth = 800, quality = 0.7) {
+    function openAdminModal() {
+      if (isAdminLoggedIn) {
+        switchTab('adminTab');
+        if(globalDataRekap.length === 0) loadDataRekap();
+      } else {
+        document.getElementById('loginModal').style.display = 'flex';
+      }
+    }
+
+    function closeAdminModal() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
+
+    async function handleLoginAdmin() {
+      const pass = document.getElementById('adminPassword').value;
+      if (!pass) return alert("Masukkan password!");
+
+      try {
+        const res = await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "loginAdmin", password: pass })
+        });
+        const result = await res.json();
+        
+        if (result.success) {
+          isAdminLoggedIn = true;
+          closeAdminModal();
+          switchTab('adminTab');
+          loadDataRekap();
+        } else {
+          alert("Password Salah!");
+        }
+      } catch (err) {
+        alert("Gagal terhubung ke Server!");
+      }
+    }
+
+    // Convert Image File to Base64
+    function fileToBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = (event) => {
-          const img = new Image();
-          img.src = event.target.result;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-
-            if (width > maxWidth) {
-              height = Math.round((height * maxWidth) / width);
-              width = maxWidth;
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', quality));
-          };
-          img.onerror = err => reject(err);
-        };
-        reader.onerror = err => reject(err);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
       });
     }
 
+    // Form Submisssion Lapangan
     async function handleSimpanData(e) {
       e.preventDefault();
       const btn = document.getElementById('btnSubmit');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim Data...';
+      btn.innerHTML = "Menyimpan Data...";
 
       try {
-        const fotoRumahFile = document.getElementById('inpFotoRumah').files[0];
-        const fotoAlatFile = document.getElementById('inpFotoAlat').files[0];
-
-        let base64Rumah = fotoRumahFile ? await compressImage(fotoRumahFile) : "";
-        let base64Alat = fotoAlatFile ? await compressImage(fotoAlatFile) : "";
+        const fotoRumahFile = document.getElementById('fotoRumah').files[0];
+        const fotoAlatFile = document.getElementById('fotoAlat').files[0];
 
         const payload = {
           action: "simpanData",
-          koordinat: document.getElementById('inpKoordinat').value,
-          odp: document.getElementById('inpOdp').value,
-          pop: document.getElementById('inpPop').value,
-          cidLama: document.getElementById('inpCidLama').value,
-          namaLama: document.getElementById('inpNamaLama').value,
-          snUnit: document.getElementById('inpSnUnit').value,
-          keterangan: document.getElementById('inpKeterangan').value,
-          fotoRumah: base64Rumah,
-          fotoAlat: base64Alat
+          koordinat: document.getElementById('koordinat').value,
+          odp: document.getElementById('odp').value,
+          pop: document.getElementById('pop').value,
+          cidLama: document.getElementById('cidLama').value,
+          namaLama: document.getElementById('namaLama').value,
+          snUnit: document.getElementById('snUnit').value,
+          keterangan: document.getElementById('keterangan').value,
+          fotoRumah: await fileToBase64(fotoRumahFile),
+          fotoAlat: await fileToBase64(fotoAlatFile)
         };
 
         const res = await fetch(GAS_WEB_APP_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
 
         const result = await res.json();
-
-        if (result.success) {
-          alert("✅ Data Berhasil Disimpan ke Spreadsheet!");
+        if(result.success) {
+          alert("Data Berhasil Disimpan!");
           document.getElementById('formLapangan').reset();
         } else {
-          alert("❌ Gagal: " + result.message);
+          alert("Gagal: " + result.message);
         }
       } catch (err) {
-        alert("❌ Terjadi Kesalahan Kirim: " + err.message);
+        alert("Terjadi Error saat menyimpan data.");
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Data Lapangan';
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Simpan Data';
       }
+    }
+
+    // Load Rekap Data Admin
+    async function loadDataRekap() {
+      const tbody = document.getElementById('tableBodyData');
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align: center;">Mengambil data dari Google Sheets...</td></tr>';
+
+      try {
+        const res = await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "getRekap" })
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          globalDataRekap = result.data;
+          applyFilters();
+        } else {
+          tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: red;">Error: ${result.message}</td></tr>`;
+        }
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: red;">Gagal mengambil data dari server.</td></tr>';
+      }
+    }
+
+    // Filter & Render Table
+    function applyFilters() {
+      const selectedSheet = document.getElementById('filterSheet').value;
+      const keyword = document.getElementById('searchKeyword').value.toLowerCase().trim();
+
+      const filtered = globalDataRekap.filter(item => {
+        const matchSheet = (selectedSheet === 'ALL') || (item.sheetAsal === selectedSheet);
+        const matchKeyword = !keyword || 
+          (item.cidLama && item.cidLama.toLowerCase().includes(keyword)) ||
+          (item.namaLama && item.namaLama.toLowerCase().includes(keyword)) ||
+          (item.odp && item.odp.toLowerCase().includes(keyword)) ||
+          (item.pop && item.pop.toLowerCase().includes(keyword)) ||
+          (item.snUnit && item.snUnit.toLowerCase().includes(keyword));
+
+        return matchSheet && matchKeyword;
+      });
+
+      renderTable(filtered);
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('tableBodyData');
+      document.getElementById('totalDataCount').innerText = data.length;
+
+      if(data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center;">Data tidak ditemukan.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map((item, idx) => {
+        const sherlokHtml = item.koordinat && item.koordinat.includes("http") 
+          ? `<a href="${item.koordinat}" target="_blank" style="color: #2563eb; font-weight: 600;">Buka Maps</a>` 
+          : (item.koordinat || "-");
+
+        const fotoRumahHtml = item.urlFotoRumah && item.urlFotoRumah.includes("http") 
+          ? `<a href="${item.urlFotoRumah}" target="_blank" style="color: #2563eb;">Lihat Foto</a>` 
+          : "-";
+
+        const fotoAlatHtml = item.urlFotoAlat && item.urlFotoAlat.includes("http") 
+          ? `<a href="${item.urlFotoAlat}" target="_blank" style="color: #2563eb;">Lihat Foto</a>` 
+          : "-";
+
+        return `
+          <tr>
+            <td><input type="checkbox" class="row-checkbox" value="${idx}"></td>
+            <td><span class="badge">${item.sheetAsal}</span></td>
+            <td>${item.waktu || "-"}</td>
+            <td>${sherlokHtml}</td>
+            <td>${item.odp || "-"}</td>
+            <td>${item.pop || "-"}</td>
+            <td><b>${item.cidLama || "-"}</b><br><small>${item.namaLama || "-"}</small></td>
+            <td>${item.snUnit || "-"}</td>
+            <td>${fotoRumahHtml}</td>
+            <td>${fotoAlatHtml}</td>
+            <td>
+              <button onclick="kirimWA('${item.cidLama}', '${item.namaLama}')" class="btn btn-success" style="padding: 4px 8px; font-size: 0.75rem;">
+                <i class="fab fa-whatsapp"></i> WA
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleSelectAll(master) {
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked);
+    }
+
+    function kirimWA(cid, nama) {
+      const text = `Halo Kak, mengonfirmasi data dismantle/perbaikan:\nCID: ${cid}\nNama: ${nama}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
   </script>
 </body>
