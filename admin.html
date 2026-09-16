@@ -215,7 +215,7 @@
   </div>
 
   <script>
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyHOXnA4YsBeNdPDUxXwPlsJHPJo7k7E4IqItpNOKLjfsYeQce7a9Gda8p-3p-Ys6tJkg/exec"; // Ganti URL Apps Script Anda di sini
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyHOXnA4YsBeNdPDUxXwPlsJHPJo7k7E4IqItpNOKLjfsYeQce7a9Gda8p-3p-Ys6tJkg/exec"; // Masukkan URL Google Apps Script Anda di sini
     let globalDataRekap = [];
     let currentFilteredData = [];
 
@@ -239,13 +239,12 @@
           alert("Password Salah!");
         }
       } catch (err) {
-        // Jika testing lokal tanpa server dulu, izinkan buka
         document.getElementById('loginModal').style.display = 'none';
         loadDataRekap();
       }
     }
 
-    // LOAD DATA DATA DARI APPS SCRIPT
+    // LOAD DATA DARI APPS SCRIPT
     async function loadDataRekap() {
       const tbody = document.getElementById('tableBodyData');
       tbody.innerHTML = '<tr><td colspan="9" class="empty-msg"><i class="fas fa-spinner fa-spin"></i> Mengambil data dari server...</td></tr>';
@@ -265,7 +264,6 @@
           tbody.innerHTML = `<tr><td colspan="9" class="empty-msg" style="color: #ef4444;">Error: ${result.message}</td></tr>`;
         }
       } catch (err) {
-        // Tampilan Fallback jika belum tersambung GAS
         globalDataRekap = [];
         applyFilters();
       }
@@ -301,7 +299,7 @@
       renderTable(currentFilteredData);
     }
 
-    // HELPER SHERLOK
+    // HELPER BERSIHKAN URL MAPS/SHERLOK
     function cleanSherlokUrl(rawUrl) {
       let sherlokUrl = rawUrl || "-";
       if (sherlokUrl !== "-" && sherlokUrl.includes("http")) {
@@ -367,12 +365,31 @@
       updateSelectedCount();
     }
 
-    // UPDATE DYNAMIC COUNT ON BUTTONS
+    // UPDATE HITUNGAN PADA TOMBOL
     function updateSelectedCount() {
       const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
-      // Tombol 1: jika terpilih > 0 tampilkan jumlahnya, jika 0 tampilkan 1 WA
       document.getElementById('selectedCount1').innerText = checkedCount > 0 ? checkedCount : 1;
       document.getElementById('selectedCount2').innerText = checkedCount;
+    }
+
+    // FUNGSI TEMPLATE LAPORAN WHATSAPP
+    function buatFormatLaporan(item) {
+      const sherlokUrl = cleanSherlokUrl(item.koordinat);
+      
+      return `📌 *LAPORAN DATA LAPANGAN*
+====================================
+📂 *Sumber Sheet* : ${item.sheetAsal || 'target'}
+⏰ *Waktu*        : ${item.waktu || '-'}
+📡 *ODP*          : ${item.odp || '-'}
+🏢 *POP*          : ${item.pop || '-'}
+🆔 *CID*          : ${item.cidLama || '-'}
+👤 *Nama*         : ${item.namaLama || '-'}
+🔢 *SN Unit*      : ${item.snUnit || '-'}
+📝 *Keterangan*   : ${item.keterangan || '-'}
+====================================
+📍 *Sherlock*      : ${sherlokUrl}
+🖼️ *Foto Rumah*    : ${item.urlFotoRumah || '-'}
+🖼️ *Foto Perangkat*: ${item.urlFotoAlat || '-'}`;
     }
 
     // FUNGSI KIRIM WA TERPILIH (GABUNGAN ATAU SEKALIGUS)
@@ -383,42 +400,28 @@
       }
 
       if (type === 'gabungan') {
-        // SEKALI KIRIM SEMUA DALAM 1 CHAT
+        // GABUNGKAN SEMUA DALAM 1 CHAT WA
         let kumpulanPesan = [];
 
-        checkboxes.forEach(cb => {
+        checkboxes.forEach((cb, index) => {
           const idx = parseInt(cb.value);
           const item = currentFilteredData[idx];
           if (!item) return;
 
-          const sherlokUrl = cleanSherlokUrl(item.koordinat);
-
-          const pesanItem = 
-`📌 LAPORAN DATA LAPANGAN
-Sumber Data: Sheet (${item.sheetAsal || 'target'})
-------------------------------------
-Waktu: ${item.waktu || '-'}
-ODP: ${item.odp || '-'}
-POP: ${item.pop || '-'}
-CID: ${item.cidLama || '-'}
-Nama: ${item.namaLama || '-'}
-SN Unit: ${item.snUnit || '-'}
-------------------------------------
-📍 Sherlock: ${sherlokUrl}`;
-
+          let pesanItem = `*DATA KE-${index + 1}*\n` + buatFormatLaporan(item);
           kumpulanPesan.push(pesanItem);
         });
 
-        const gabunganPesanText = kumpulanPesan.join("\n\n====================================\n\n");
+        const gabunganPesanText = kumpulanPesan.join("\n\n------------------------------------\n\n");
         const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(gabunganPesanText)}`;
         window.open(waUrl, '_blank');
 
       } else if (type === 'sekaligus') {
-        // BUKATAB WA SATU PER SATU SEKALIGUS
+        // BUKA TAB WA SATU PER SATU DENGAN DELAY
         checkboxes.forEach((cb, i) => {
           setTimeout(() => {
             kirimWASatuan(parseInt(cb.value));
-          }, i * 800); // jeda delay agar browser tidak memblokir pop-up
+          }, i * 800);
         });
       }
     }
@@ -428,21 +431,7 @@ SN Unit: ${item.snUnit || '-'}
       const item = currentFilteredData[itemIndex];
       if (!item) return;
 
-      const sherlokUrl = cleanSherlokUrl(item.koordinat);
-
-      const pesan = 
-`📌 LAPORAN DATA LAPANGAN
-Sumber Data: Sheet (${item.sheetAsal || 'target'})
-------------------------------------
-Waktu: ${item.waktu || '-'}
-ODP: ${item.odp || '-'}
-POP: ${item.pop || '-'}
-CID: ${item.cidLama || '-'}
-Nama: ${item.namaLama || '-'}
-SN Unit: ${item.snUnit || '-'}
-------------------------------------
-📍 Sherlock: ${sherlokUrl}`;
-
+      const pesan = buatFormatLaporan(item);
       const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(pesan)}`;
       window.open(waUrl, '_blank');
     }
