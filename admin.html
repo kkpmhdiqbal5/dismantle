@@ -215,7 +215,7 @@
   </div>
 
   <script>
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyHOXnA4YsBeNdPDUxXwPlsJHPJo7k7E4IqItpNOKLjfsYeQce7a9Gda8p-3p-Ys6tJkg/exec"; // Masukkan URL Google Apps Script Anda di sini
+    const GAS_WEB_APP_URL = "URL_WEB_APP_UTAMA_ANDA"; // Ganti URL Apps Script Anda di sini
     let globalDataRekap = [];
     let currentFilteredData = [];
 
@@ -372,24 +372,21 @@
       document.getElementById('selectedCount2').innerText = checkedCount;
     }
 
-    // FUNGSI TEMPLATE LAPORAN WHATSAPP
-    function buatFormatLaporan(item) {
+    // FUNGSI BUAT FORMAT LAPORAN SATUAN (SESUAI TEMPLATE BARU)
+    function buatFormatSatuan(item, nomor = null) {
       const sherlokUrl = cleanSherlokUrl(item.koordinat);
+      const headerNama = nomor ? `*${nomor}. ${item.namaLama || '-'}*` : `*${item.namaLama || '-'}*`;
       
-      return `📌 *LAPORAN DATA LAPANGAN*
-====================================
-📂 *Sumber Sheet* : ${item.sheetAsal || 'target'}
-⏰ *Waktu*        : ${item.waktu || '-'}
-📡 *ODP*          : ${item.odp || '-'}
-🏢 *POP*          : ${item.pop || '-'}
-🆔 *CID*          : ${item.cidLama || '-'}
-👤 *Nama*         : ${item.namaLama || '-'}
-🔢 *SN Unit*      : ${item.snUnit || '-'}
-📝 *Keterangan*   : ${item.keterangan || '-'}
-====================================
-📍 *Sherlock*      : ${sherlokUrl}
-🖼️ *Foto Rumah*    : ${item.urlFotoRumah || '-'}
-🖼️ *Foto Perangkat*: ${item.urlFotoAlat || '-'}`;
+      return `${headerNama}
+• ODP: ${item.odp || '-'}
+• POP: ${item.pop || '-'}
+• CID: ${item.cidLama || '-'}
+• SN: ${item.snUnit || '-'}
+• Sheet: ${item.sheetAsal || 'Full Data'}
+• Ket: ${item.keterangan || '-'}
+📍 Sherlock: ${sherlokUrl}
+🖼️ Foto Rumah: ${item.urlFotoRumah && item.urlFotoRumah.startsWith('http') ? item.urlFotoRumah : '-'}
+🖼️ Foto Alat: ${item.urlFotoAlat && item.urlFotoAlat.startsWith('http') ? item.urlFotoAlat : '-'}`;
     }
 
     // FUNGSI KIRIM WA TERPILIH (GABUNGAN ATAU SEKALIGUS)
@@ -400,24 +397,29 @@
       }
 
       if (type === 'gabungan') {
-        // GABUNGKAN SEMUA DALAM 1 CHAT WA
         let kumpulanPesan = [];
+        const total = checkboxes.length;
+
+        // Header Rekap Gabungan
+        let pesanGabungan = `*📋 REKAP GABUNGAN (${total} DATA LAPANGAN)*\n====================================\n\n`;
 
         checkboxes.forEach((cb, index) => {
           const idx = parseInt(cb.value);
           const item = currentFilteredData[idx];
           if (!item) return;
 
-          let pesanItem = `*DATA KE-${index + 1}*\n` + buatFormatLaporan(item);
-          kumpulanPesan.push(pesanItem);
+          kumpulanPesan.push(buatFormatSatuan(item, index + 1));
         });
 
-        const gabunganPesanText = kumpulanPesan.join("\n\n------------------------------------\n\n");
-        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(gabunganPesanText)}`;
+        // Gabungkan antar item dengan pembatas strip
+        pesanGabungan += kumpulanPesan.join("\n------------------------------------\n");
+        pesanGabungan += "\n------------------------------------";
+
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(pesanGabungan)}`;
         window.open(waUrl, '_blank');
 
       } else if (type === 'sekaligus') {
-        // BUKA TAB WA SATU PER SATU DENGAN DELAY
+        // Buka chat WA terpisah untuk setiap item
         checkboxes.forEach((cb, i) => {
           setTimeout(() => {
             kirimWASatuan(parseInt(cb.value));
@@ -426,12 +428,12 @@
       }
     }
 
-    // FUNGSI KIRIM WA SATUAN
+    // FUNGSI KIRIM WA SATUAN (CHAT INDIVIDUAL)
     function kirimWASatuan(itemIndex) {
       const item = currentFilteredData[itemIndex];
       if (!item) return;
 
-      const pesan = buatFormatLaporan(item);
+      const pesan = buatFormatSatuan(item);
       const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(pesan)}`;
       window.open(waUrl, '_blank');
     }
